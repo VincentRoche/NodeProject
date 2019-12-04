@@ -27,19 +27,14 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
+      <v-btn text>
+        <span class="mr-2">Log out</span>
+        <v-icon>mdi-door</v-icon>
       </v-btn>
     </v-app-bar>
 
     <v-content>
-        <router-view></router-view>
-
+      <router-view></router-view>
     </v-content>
   </v-app>
 </template>
