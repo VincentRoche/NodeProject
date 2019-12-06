@@ -10,7 +10,7 @@
           Welcome to EPIC JUSTE PRIX 3000
         </h1>
         <div class="my-2">
-          <v-btn large color="primary">Log in</v-btn>
+          <v-btn large color="primary" to="/login">Log in</v-btn>
         </div>
         <div class="my-2">
           <v-btn large color="primary" to="/newAccount">Create an account</v-btn>

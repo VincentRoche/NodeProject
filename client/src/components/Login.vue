@@ -18,7 +18,7 @@
             dark
             flat
             >
-                <v-toolbar-title>New account</v-toolbar-title>
+                <v-toolbar-title>Log in</v-toolbar-title>
             </v-toolbar>
             <v-card-text>
                 <v-form>
@@ -36,20 +36,12 @@
                     prepend-icon="mdi-lock"
                     type="password"
                     />
-
-                    <v-text-field
-                    id="passwordConfirm"
-                    label="Confirm password"
-                    name="passwordConfirm"
-                    prepend-icon="mdi-lock"
-                    type="password"
-                    />
                 </v-form>
             </v-card-text>
             <v-card-actions>
-                <v-btn text to="/login">Use an existing account</v-btn>
+                <v-btn text to="/newAccount">Create an account</v-btn>
                 <v-spacer />
-                <v-btn  color="primary">Create account</v-btn>
+                <v-btn color="primary">Log in</v-btn>
             </v-card-actions>
         </v-card>
         </v-col>
