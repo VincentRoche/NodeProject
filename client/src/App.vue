@@ -7,6 +7,7 @@
     >
       <router-link to="/">
         <div class="d-flex align-center">
+          
           <v-img
             alt="Vuetify Logo"
             class="shrink mr-2"
@@ -29,7 +30,7 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn text>
+      <v-btn text v-if="$store.getters['session/isLoggedIn']" @click="$store.commit('session/logout')">
         <span class="mr-2">Log out</span>
         <v-icon>mdi-door</v-icon>
       </v-btn>
