@@ -49,7 +49,7 @@
             <v-card-actions>
                 <v-btn text to="/login">Use an existing account</v-btn>
                 <v-spacer />
-                <v-btn  color="primary">Create account</v-btn>
+                <v-btn color="primary" @click="submitNewAccount" :loading="loading">Create account</v-btn>
             </v-card-actions>
         </v-card>
         </v-col>
@@ -59,9 +59,23 @@
 
 <script>
 export default {
-  name: 'Home',
-
   data: () => ({
+      loading: false
   }),
-};
+  created () {
+    // Redirect to home page if already logged in
+    if (this.$store.getters['session/isLoggedIn'])
+        this.$router.push('/')
+  },
+  methods: {
+    submitNewAccount() {
+        this.loading = true
+        // Faire la requête...
+
+        // Si c'est valide :
+        this.$store.commit('session/login', 1, { username: 'TEST' })
+        //this.$router.push('/')
+    }
+  }
+}
 </script>

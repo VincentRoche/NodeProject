@@ -16,6 +16,10 @@ const actions = {}
 
 // mutations
 const mutations = {
+  login (state, sessionId, user) {
+    state.sessionId = sessionId
+    state.user = user
+  },
   logout (state) {
     state.sessionId = null
     state.user = null
