@@ -55,7 +55,7 @@
       <v-row justify="center">
         <v-col>
           <v-btn
-            to="/lobby"
+            to="/lobby/new"
             :disabled="joinLoading"
           >
             Create a game
@@ -78,9 +78,6 @@ export default {
      */
     joinGame () {
       this.joinLoading = true
-      // Faire la requête...
-
-      // Si c'est valide :
       this.$router.push(`/lobby/${this.gameNumber}`)
     }
   }

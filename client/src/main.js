@@ -6,6 +6,7 @@ import vuetify from './plugins/vuetify'
 import Home from './components/Home'
 import NewAccount from './components/NewAccount'
 import Login from './components/Login'
+import Lobby from './components/Lobby'
 
 import store from './store'
 
@@ -17,6 +18,7 @@ const router = new VueRouter({
   routes: [
     { path: '/login', component: Login },
     { path: '/newAccount', component: NewAccount },
+    { path: '/lobby/:gameNumber', component: Lobby },
     { path: '*', component: Home }
   ]
 })
