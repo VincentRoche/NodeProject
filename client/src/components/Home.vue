@@ -1,80 +1,85 @@
 <template>
-  <v-container>
-    <v-layout
-      text-center
-      wrap
-    >
+  <v-container
+    class="mt-12"
+    fluid
+    text-center
+  >
 
-      <v-flex mb-4>
+    <v-row justify="center">
+      <v-col md="8">
         <h1 class="display-2 font-weight-bold mb-3">
           Welcome to EPIC JUSTE PRIX 3000
         </h1>
-        <div class="my-2">
-          <v-btn large color="primary">Log in</v-btn>
-        </div>
-        <div class="my-2">
-          <v-btn large color="primary">Create an account</v-btn>
-        </div>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
+
+    <template v-if="!this.$store.getters['session/isLoggedIn']">
+      <v-row justify="center">
+        <v-col sm="4" lg="2">
+          <v-btn large block color="primary" to="/login">Log in</v-btn>
+        </v-col>
+        <v-col sm="4" lg="2">
+          <v-btn large block color="primary" to="/newAccount">Create an account</v-btn>
+        </v-col>
+      </v-row>
+    </template>
+
+    <template v-else>
+      <v-row justify="center">
+        <v-col sm="6" md="4" lg="2">
+          <p class="font-weight-medium">Join a game:</p>
+          <v-form>
+            <v-text-field
+              v-model="gameNumber"
+              label="Game number"
+              solo
+              required
+              type="number"
+              :disabled="joinLoading"
+            >
+              <template v-slot:append>
+                <v-btn 
+                  color="primary" 
+                  fab
+                  small
+                  @click="joinGame"
+                  :loading="joinLoading"
+                >
+                  <v-icon>mdi-send</v-icon>
+                </v-btn>
+              </template>
+            </v-text-field>
+          </v-form>
+        </v-col>
+      </v-row>
+      <v-row justify="center">
+        <v-col>
+          <v-btn
+            to="/lobby/new"
+            :disabled="joinLoading"
+          >
+            Create a game
+          </v-btn>
+        </v-col>
+      </v-row>
+    </template>
   </v-container>
 </template>
 
 <script>
 export default {
-  name: 'Home',
-
   data: () => ({
-    ecosystem: [
-      {
-        text: 'vuetify-loader',
-        href: 'https://github.com/vuetifyjs/vuetify-loader',
-      },
-      {
-        text: 'github',
-        href: 'https://github.com/vuetifyjs/vuetify',
-      },
-      {
-        text: 'awesome-vuetify',
-        href: 'https://github.com/vuetifyjs/awesome-vuetify',
-      },
-    ],
-    importantLinks: [
-      {
-        text: 'Documentation',
-        href: 'https://vuetifyjs.com',
-      },
-      {
-        text: 'Chat',
-        href: 'https://community.vuetifyjs.com',
-      },
-      {
-        text: 'Made with Vuetify',
-        href: 'https://madewithvuejs.com/vuetify',
-      },
-      {
-        text: 'Twitter',
-        href: 'https://twitter.com/vuetifyjs',
-      },
-      {
-        text: 'Articles',
-        href: 'https://medium.com/vuetify',
-      },
-    ],
-    whatsNext: [
-      {
-        text: 'Explore components',
-        href: 'https://vuetifyjs.com/components/api-explorer',
-      },
-      {
-        text: 'Select a layout',
-        href: 'https://vuetifyjs.com/layout/pre-defined',
-      },
-      {
-        text: 'Frequently Asked Questions',
-        href: 'https://vuetifyjs.com/getting-started/frequently-asked-questions',
-      },
-    ],
+    gameNumber: '',
+    joinLoading: false
   }),
-};
+  methods: {
+    /**
+     * Attempt to join game with the given number
+     */
+    joinGame () {
+      this.joinLoading = true
+      this.$router.push(`/lobby/${this.gameNumber}`)
+    }
+  }
+}
 </script>

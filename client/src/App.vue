@@ -5,29 +5,32 @@
       color="primary"
       dark
     >
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
+      <router-link to="/">
+        <div class="d-flex align-center">
+          
+          <v-img
+            alt="Vuetify Logo"
+            class="shrink mr-2"
+            contain
+            src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
+            transition="scale-transition"
+            width="40"
+          />
 
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
-      </div>
+          <v-img
+            alt="Vuetify Name"
+            class="shrink mt-1 hidden-sm-and-down"
+            contain
+            min-width="100"
+            src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
+            width="100"
+          />
+        </div>
+      </router-link>
 
       <v-spacer></v-spacer>
 
-      <v-btn text>
+      <v-btn text v-if="$store.getters['session/isLoggedIn']" @click="$store.commit('session/logout')">
         <span class="mr-2">Log out</span>
         <v-icon>mdi-door</v-icon>
       </v-btn>
