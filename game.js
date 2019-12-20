@@ -2,12 +2,12 @@ class GamesHandler {
   constructor (server) {
     /** @member {Array<Game>} */
     this.pendingGames = {}
-    const io = require('socket.io')(server, {
+    this.io = require('socket.io')(server, {
       // path: '/game',
       pingInterval: 2000,
       pingTimeout: 4000
     })
-    this.socketsListener = io.listen(server)
+    // this.socketsListener = io.listen(server)
     server.listen(8080)
     console.log('Socket listening on port 8080')
     this.addEvents()
@@ -20,7 +20,7 @@ class GamesHandler {
    */
   addEvents () {
     const games = this.pendingGames
-    this.socketsListener.on('connection', function (socket) {
+    this.io.on('connection', function (socket) {
       socket.on('joinGame', function (message) {
         if (games[message.gameNumber]) {
           games[message.gameNumber].addPlayer(new Player(message.name, socket))
@@ -138,7 +138,7 @@ class Game {
       player.socket.on('disconnect', (reason) => {
         reject(reason)
       })
-        })
+    })
   }
 
   readySignal (player) {
