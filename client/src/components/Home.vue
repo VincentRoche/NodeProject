@@ -28,7 +28,7 @@
       <v-row justify="center">
         <v-col sm="6" md="4" lg="2">
           <p class="font-weight-medium">Join a game:</p>
-          <v-form>
+          <v-form @submit="joinGame">
             <v-text-field
               v-model="gameNumber"
               label="Game number"

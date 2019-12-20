@@ -13,7 +13,7 @@
           tile
           flat
         >
-          <v-card-title class="headline">Game number: {{gameNumber}}</v-card-title>
+          <v-card-title class="headline">Game number: {{ gameNumber }}</v-card-title>
           <v-card-subtitle>Give this number to people you want to play with.</v-card-subtitle>
           <v-card-text class="mt-8">
             <p class="body-1">
