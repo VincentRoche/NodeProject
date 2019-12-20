@@ -7,6 +7,7 @@ import Home from './components/Home'
 import NewAccount from './components/NewAccount'
 import Login from './components/Login'
 import Lobby from './components/Lobby'
+import Round from './components/Round'
 
 import store from './store'
 
@@ -19,6 +20,7 @@ const router = new VueRouter({
     { path: '/login', component: Login },
     { path: '/newAccount', component: NewAccount },
     { path: '/lobby/:gameNumber', component: Lobby },
+    { path: '/round', component: Round },
     { path: '*', component: Home }
   ]
 })
