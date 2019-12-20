@@ -1,3 +1,10 @@
+const models = require('./mongoosestructures.js')
+// const mongoose = require('mongoose')
+// const globalInfo = require('./globalinfo.js')
+const Product = models[0]
+
+// mongoose.connect(globalInfo[0], { useNewUrlParser: true, useUnifiedTopology: true })
+
 class GamesHandler {
   constructor (server) {
     /** @member {Array<Game>} */
@@ -55,6 +62,24 @@ class Game {
     if (this.players.length === this.maxPlayers) {
       this.startGame()
     }
+  }
+
+  inArray (randomProducts, product) {
+    for (let i = 0; i < randomProducts.length; i++) {
+      if (randomProducts[i].name === product.name) return true
+    }
+    return false
+  }
+  async getRandomProducts (nbRounds) {
+    let randomProducts = []
+    let numberOfProducts = await Product.estimatedDocumentCount()
+    for (let i = 0; i < nbRounds; i++) {
+      let random = Math.floor(Math.random() * numberOfProducts)
+      let product = await Product.findOne().skip(random)
+      if (!this.inArray(randomProducts, product)) randomProducts.push(product)
+      else i--
+    }
+    return randomProducts
   }
 
   startGame () {

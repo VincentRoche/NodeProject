@@ -27,6 +27,7 @@
                     name="username"
                     prepend-icon="mdi-account"
                     type="text"
+                    v-model="username"
                     />
 
                     <v-text-field
@@ -35,13 +36,14 @@
                     name="password"
                     prepend-icon="mdi-lock"
                     type="password"
+                    v-model="password"
                     />
                 </v-form>
             </v-card-text>
             <v-card-actions>
                 <v-btn text to="/newAccount">Create an account</v-btn>
                 <v-spacer />
-                <v-btn color="primary">Log in</v-btn>
+                <v-btn color="primary" @click="tryToLogin">Log in</v-btn>
             </v-card-actions>
         </v-card>
         </v-col>
@@ -53,5 +55,25 @@
 export default {
   data: () => ({
   }),
+  methods: {
+      tryToLogin() {
+        // Cette requête pour se connecter te renvoie les messages suivants :
+        // Soit une erreur liée au schema mongoose genre 'Username must not be empty.'
+        // Soit 'User doesn't exist.'
+        // Soit 'User logged in.'
+        // Faut passer à la suite seulement si tu reçois 'User logged in.'
+        // messages présents dans res.data
+        // En sachant qu'à chaque fois je te renvoie un tableau de string
+        // parce que tu peux avoir plusieurs erreurs en même temps
+        // donc si tu veux tu peux faire une sorte de 'liste' à afficher à côté
+        this.axios.post('http://localhost:4000/log', {
+                    username: this.username,
+                    password: this.password
+                })
+                .then(function (res) {
+                    alert(res.data)
+                })
+      }
+  }
 };
 </script>

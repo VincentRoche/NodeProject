@@ -27,6 +27,7 @@
                     name="username"
                     prepend-icon="mdi-account"
                     type="text"
+                    v-model="username"
                     />
 
                     <v-text-field
@@ -35,6 +36,7 @@
                     name="password"
                     prepend-icon="mdi-lock"
                     type="password"
+                    v-model="password"
                     />
 
                     <v-text-field
@@ -69,9 +71,24 @@ export default {
   },
   methods: {
     submitNewAccount() {
-        this.loading = true
+        // this.loading = true
         // Faire la requête...
-
+        // Cette requête te renvoie soit les erreurs par rapport au schéma Mongoose
+        // donc 'Username must not be empty.' et des trucs du genre
+        // soit il te renvoie 'Username already taken.'
+        // soit 'User saved.'
+        // Le but du coup c'est de passer à la suite seulement si tu as reçu
+        // 'User saved.' et c'est ce que tu as dans res.data
+        // En sachant qu'à chaque fois je te renvoie un tableau de string
+        // parce que tu peux avoir plusieurs erreurs en même temps
+        // donc si tu veux tu peux faire une sorte de 'liste' à afficher à côté
+        this.axios.post('http://localhost:4000/acc', {
+                    username: this.username,
+                    password: this.password
+                })
+                .then(function (res) {
+                    alert(res.data)
+                })
         // Si c'est valide :
         this.$store.commit('session/login', 1, { username: 'TEST' })
         //this.$router.push('/')
