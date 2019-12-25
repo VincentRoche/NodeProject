@@ -25,7 +25,7 @@
                     ref="form"
                     v-model="valid"
                 >
-                    <v-alert type="error" :value="!!error">{{ error }}</v-alert>
+                    <v-alert type="error" v-if="errors.length">{{ errors.join(' ') }}</v-alert>
                     <v-text-field
                         label="Username"
                         name="username"
@@ -80,7 +80,7 @@ export default {
       ],
       passwordVerif: '',
       loading: false,
-      error: ''
+      errors: []
   }),
   created () {
     // Redirect to home page if already logged in
@@ -92,7 +92,7 @@ export default {
         if (this.$refs.form.validate()) {
             // Error if the two passwords do not match
             if (this.password !== this.passwordVerif) {
-                this.error = 'The two passwords do not match.'
+                this.errors.push('The two passwords do not match.')
             } else {
                 this.loading = true
                 // Faire la requête...
@@ -112,9 +112,10 @@ export default {
 
                 // If there are errors, display them
                 if (result.data !== 'User saved.') {
-                    this.error = result.data.join(', ')
+                    this.errors = result.data
                     this.loading = false
                 } else {
+                    this.errors = []
                     // If the account was created, log in and redirect
                     this.$store.commit('session/login', { sessionId: 1, username: this.username }) // TODO: Mettre le numéro de session renvoyé par la requête d'avant
                     this.$router.push('/') // Back to the home page
