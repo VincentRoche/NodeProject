@@ -88,7 +88,7 @@ export default {
         this.$router.push('/')
   },
   methods: {
-    submitNewAccount() {
+    async submitNewAccount() {
         if (this.$refs.form.validate()) {
             // Error if the two passwords do not match
             if (this.password !== this.passwordVerif) {
@@ -105,16 +105,20 @@ export default {
                 // En sachant qu'à chaque fois je te renvoie un tableau de string
                 // parce que tu peux avoir plusieurs erreurs en même temps
                 // donc si tu veux tu peux faire une sorte de 'liste' à afficher à côté
-                this.axios.post('http://localhost:4000/acc', {
-                            username: this.username,
-                            password: this.password
-                        })
-                        .then(function (res) {
-                            alert(res.data)
-                        })
-                // Si c'est valide :
-                this.$store.commit('session/login', 1, { username: 'TEST' })
-                //this.$router.push('/')
+                const result = await this.axios.post('http://localhost:4000/acc', {
+                    username: this.username,
+                    password: this.password
+                })
+
+                // If there are errors, display them
+                if (result.data !== 'User saved.') {
+                    this.error = result.data.join(', ')
+                    this.loading = false
+                } else {
+                    // If the account was created, log in and redirect
+                    this.$store.commit('session/login', { sessionId: 1, username: this.username }) // TODO: Mettre le numéro de session renvoyé par la requête d'avant
+                    this.$router.push('/') // Back to the home page
+                }
             }
         }
     }

@@ -3,14 +3,20 @@ const io = require('socket.io-client')
 // initial state
 const state = {
   sessionId: null,
-  user: null,
+  username: null,
   gameSocket: null
 }
+
+// Game socket
+let gameSocket = null
 
 // getters
 const getters = {
   isLoggedIn (state) {
     return !!state.sessionId
+  },
+  gameSocket () {
+    return gameSocket
   }
 }
 
@@ -19,18 +25,18 @@ const actions = {}
 
 // mutations
 const mutations = {
-  login (state, sessionId, user) {
+  login (state, { sessionId, username }) {
     state.sessionId = sessionId
-    state.user = user
+    state.username = username
 
     // Connect socket
-    const socketAddress = 'ws://localhost:8080'
-    this.socket = io(socketAddress)
+    const socketAddress = 'http://localhost:8080'
+    gameSocket = io(socketAddress, { query: { sessionId: sessionId } })
   },
   logout (state) {
     state.sessionId = null
-    state.user = null
-    state.gameSocket = null
+    state.username = null
+    gameSocket = null
   }
 }
 
@@ -39,5 +45,6 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
+  gameSocket
 }
