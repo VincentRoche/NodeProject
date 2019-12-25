@@ -25,6 +25,7 @@
                     ref="form"
                     v-model="valid"
                 >
+                    <v-alert type="error" v-if="errors.length">{{ errors.join(' ') }}</v-alert>
                     <v-text-field
                         label="Username"
                         name="username"
@@ -69,11 +70,13 @@ export default {
         v => !!v || 'Password is required'
       ],
       loading: false,
-      error: ''
+      errors: []
   }),
   methods: {
       async tryToLogin() {
         if (this.$refs.form.validate()) {
+            this.loading = true
+
             // Cette requête pour se connecter te renvoie les messages suivants :
             // Soit une erreur liée au schema mongoose genre 'Username must not be empty.'
             // Soit 'User doesn't exist.'
@@ -83,13 +86,22 @@ export default {
             // En sachant qu'à chaque fois je te renvoie un tableau de string
             // parce que tu peux avoir plusieurs erreurs en même temps
             // donc si tu veux tu peux faire une sorte de 'liste' à afficher à côté
-            this.axios.post('http://localhost:4000/log', {
+            const result = await this.axios.post('http://localhost:4000/log', {
                 username: this.username,
                 password: this.password
             })
-            .then(function (res) {
-                alert(res.data)
-            })
+                
+            this.errors = []
+            this.loading = false
+
+            // If there are errors, display them
+            if (result.data !== 'User logged in.') {
+                this.errors = [result.data]
+            } else {
+                // If successful, save session and redirect
+                this.$store.commit('session/login', { sessionId: 1, username: this.username }) // TODO: Mettre le numéro de session renvoyé par la requête d'avant
+                this.$router.push('/') // Back to the home page
+            }
         }
       }
   }
