@@ -30,6 +30,8 @@
 
       <v-spacer></v-spacer>
 
+      <span class="mr-2">{{ $store.state.session.username }}</span>
+
       <v-btn text v-if="$store.getters['session/isLoggedIn']" @click="$store.commit('session/logout')">
         <span class="mr-2">Log out</span>
         <v-icon>mdi-door</v-icon>
