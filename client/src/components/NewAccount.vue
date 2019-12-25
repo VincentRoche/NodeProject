@@ -1,50 +1,57 @@
 <template>
   <v-container
-    class="fill-height"
-    fluid
+        class="fill-height"
+        fluid
     >
     <v-row
         align="center"
         justify="center"
     >
         <v-col
-        cols="12"
-        sm="8"
-        md="4"
+            cols="12"
+            sm="8"
+            md="4"
         >
         <v-card class="elevation-12">
             <v-toolbar
-            color="primary"
-            dark
-            flat
+                color="primary"
+                dark
+                flat
             >
                 <v-toolbar-title>New account</v-toolbar-title>
             </v-toolbar>
             <v-card-text>
-                <v-form>
+                <v-form
+                    ref="form"
+                    v-model="valid"
+                >
+                    <v-alert type="error" :value="!!error">{{ error }}</v-alert>
                     <v-text-field
-                    label="Username"
-                    name="username"
-                    prepend-icon="mdi-account"
-                    type="text"
-                    v-model="username"
+                        label="Username"
+                        name="username"
+                        prepend-icon="mdi-account"
+                        type="text"
+                        v-model="username"
+                        :rules="usernameRules"
                     />
 
                     <v-text-field
-                    id="password"
-                    label="Password"
-                    name="password"
-                    prepend-icon="mdi-lock"
-                    type="password"
-                    v-model="password"
+                        id="password"
+                        label="Password"
+                        name="password"
+                        prepend-icon="mdi-lock"
+                        type="password"
+                        v-model="password"
+                        :rules="passwordRules"
                     />
 
                     <v-text-field
-                    id="passwordConfirm"
-                    label="Confirm password"
-                    name="passwordConfirm"
-                    prepend-icon="mdi-lock"
-                    type="password"
+                        id="passwordConfirm"
+                        label="Confirm password"
+                        name="passwordConfirm"
+                        prepend-icon="mdi-lock"
+                        type="password"
+                        v-model="passwordVerif"
                     />
                 </v-form>
             </v-card-text>
@@ -62,7 +69,18 @@
 <script>
 export default {
   data: () => ({
-      loading: false
+      valid: true,
+      username: '',
+      usernameRules: [
+        v => !!v || 'Username is required'
+      ],
+      password: '',
+      passwordRules: [
+        v => !!v || 'Password is required'
+      ],
+      passwordVerif: '',
+      loading: false,
+      error: ''
   }),
   created () {
     // Redirect to home page if already logged in
@@ -71,27 +89,34 @@ export default {
   },
   methods: {
     submitNewAccount() {
-        // this.loading = true
-        // Faire la requête...
-        // Cette requête te renvoie soit les erreurs par rapport au schéma Mongoose
-        // donc 'Username must not be empty.' et des trucs du genre
-        // soit il te renvoie 'Username already taken.'
-        // soit 'User saved.'
-        // Le but du coup c'est de passer à la suite seulement si tu as reçu
-        // 'User saved.' et c'est ce que tu as dans res.data
-        // En sachant qu'à chaque fois je te renvoie un tableau de string
-        // parce que tu peux avoir plusieurs erreurs en même temps
-        // donc si tu veux tu peux faire une sorte de 'liste' à afficher à côté
-        this.axios.post('http://localhost:4000/acc', {
-                    username: this.username,
-                    password: this.password
-                })
-                .then(function (res) {
-                    alert(res.data)
-                })
-        // Si c'est valide :
-        this.$store.commit('session/login', 1, { username: 'TEST' })
-        //this.$router.push('/')
+        if (this.$refs.form.validate()) {
+            // Error if the two passwords do not match
+            if (this.password !== this.passwordVerif) {
+                this.error = 'The two passwords do not match.'
+            } else {
+                this.loading = true
+                // Faire la requête...
+                // Cette requête te renvoie soit les erreurs par rapport au schéma Mongoose
+                // donc 'Username must not be empty.' et des trucs du genre
+                // soit il te renvoie 'Username already taken.'
+                // soit 'User saved.'
+                // Le but du coup c'est de passer à la suite seulement si tu as reçu
+                // 'User saved.' et c'est ce que tu as dans res.data
+                // En sachant qu'à chaque fois je te renvoie un tableau de string
+                // parce que tu peux avoir plusieurs erreurs en même temps
+                // donc si tu veux tu peux faire une sorte de 'liste' à afficher à côté
+                this.axios.post('http://localhost:4000/acc', {
+                            username: this.username,
+                            password: this.password
+                        })
+                        .then(function (res) {
+                            alert(res.data)
+                        })
+                // Si c'est valide :
+                this.$store.commit('session/login', 1, { username: 'TEST' })
+                //this.$router.push('/')
+            }
+        }
     }
   }
 }
