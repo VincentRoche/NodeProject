@@ -11,7 +11,7 @@ const actions = {}
 
 // mutations
 const mutations = {
-  setGameNumber (state, gameNumber) {
+  setGameNumber (state, { gameNumber }) {
     state.gameNumber = gameNumber
   },
   resetGameNumber (state) {

@@ -26,7 +26,7 @@
                 class="pa-2 ma-2"
                 outlined
               >
-                {{player.name}}
+                {{ player.name }}
               </v-card>
             </div>
           </v-card-text>
@@ -132,6 +132,7 @@
 <script>
 export default {
   data: () => ({
+    socket: null,
     gameNumber: 0,
     players: [
       { id:0, name:'Jacques Chirac' },
@@ -145,32 +146,47 @@ export default {
     gameStarting: false
   }),
   created () {
+    // Leave if not logged in
+    if (!this.$store.getters['session/isLoggedIn']) {
+      this.$router.push('/')
+      return
+    }
+
+    // Socket listeners
+    this.socket = this.$store.getters['session/gameSocket']
+    this.socket.on('GameStart', () => {
+      this.$router.push('/round')
+    })
+
+    // Create the game if the user wants to
     if (this.$route.params.gameNumber === 'new') {
       // Create a new game and make this user admin
       // Faire la requête de création de partie, récupérer le numéro...
-
+      this.socket.emit('hostGame', 123456)
+      this.gameNumber = 123456
       this.isGameAdmin = true
     } else {
-      // Join an existing game
-      this.isGameAdmin = false
       this.gameNumber = this.$route.params.gameNumber
-      
-      let errorAlreadyStarted = false // True if the game is already started
-      let errorNotExist = false // True if the game is already started
-      // Faire la requête de rejoignage de la partie avec le numéro donné...
+    }
 
-      if (errorAlreadyStarted || errorNotExist)
-      {
-        if (errorAlreadyStarted)
-          alert('This game is already started.')
-        else if (errorNotExist)
-          alert('There is no game with the number you entered.')
-        this.$router.push('/')
-      }
-      else
-      {
-        //
-      }
+    // Join the game
+    
+    let errorAlreadyStarted = false // True if the game is already started
+    let errorNotExist = false // True if the game is already started
+    // Faire la requête de rejoignage de la partie avec le numéro donné...
+    this.socket.emit('joinGame', { name: this.$store.state.session.username, gameNumber: this.gameNumber })
+
+    if (errorAlreadyStarted || errorNotExist)
+    {
+      if (errorAlreadyStarted)
+        alert('This game is already started.')
+      else if (errorNotExist)
+        alert('There is no game with the number you entered.')
+      this.$router.push('/')
+    }
+    else
+    {
+      //
     }
   },
   watch: {
@@ -190,7 +206,7 @@ export default {
      */
     startGame () {
       this.gameStarting = true
-
+      // TODO: Emettre le signal de lancement du jeu
     },
     /**
      * Sends the new game settings to the server
