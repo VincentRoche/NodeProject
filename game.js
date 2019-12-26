@@ -70,12 +70,13 @@ class Game {
     }
     return false
   }
+
   async getRandomProducts (nbRounds) {
-    let randomProducts = []
-    let numberOfProducts = await Product.estimatedDocumentCount()
+    const randomProducts = []
+    const numberOfProducts = await Product.estimatedDocumentCount()
     for (let i = 0; i < nbRounds; i++) {
-      let random = Math.floor(Math.random() * numberOfProducts)
-      let product = await Product.findOne().skip(random)
+      const random = Math.floor(Math.random() * numberOfProducts)
+      const product = await Product.findOne().skip(random)
       if (!this.inArray(randomProducts, product)) randomProducts.push(product)
       else i--
     }
@@ -91,7 +92,7 @@ class Game {
     //     this.startRound({name:'patate', image: 'patate.jpg'})
     // }
     const clock = new Clock(this.players, 10)
-    this.startRound({ name: 'patate', image: 'patate.jpg', price: 100 }, clock)
+    this.startRound({ name: 'patate', image: 'https://upload.wikimedia.org/wikipedia/commons/a/a3/234_Solanum_tuberosum_L.jpg', price: 100 }, clock)
   }
 
   async startRound (object, clock) {
@@ -126,7 +127,8 @@ class Game {
     }
 
     for (const player of this.players) {
-      player.socket.emit('score', JSON.stringify(this.generateScoreBoard()))
+      const scoreboard = this.generateScoreBoard()
+      player.socket.emit('score', scoreboard)
     }
   }
 

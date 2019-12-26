@@ -73,6 +73,8 @@
                     contain
                     max-height="600"
                     class="mt-4"
+                    v-if="imageUrl"
+                    v-on:load="ready"
                   >
                     <!-- Answer overlay -->
                     <v-overlay
@@ -107,7 +109,7 @@
               class="my-2"
               outlined
               v-for="(player, index) in this.sortedPlayers"
-              :key="player.id"
+              :key="player.name"
             >
               <v-container>
                 <v-row align="center" class="flex-nowrap" no-gutters>
@@ -147,7 +149,7 @@
               md="4"
               lg="3"
               v-for="(player, index) in this.sortedPlayers"
-              :key="player.id"
+              :key="player.name"
             >
               <v-card
                 outlined
@@ -176,13 +178,14 @@
 <script>
 export default {
   data: () => ({
-    itemName: 'Rafale',
-    imageUrl: 'https://raw.githubusercontent.com/VincentRoche/NodeProject/develop/productPictures/1.jpg',
+    socket: null,
+    itemName: '',
+    imageUrl: '',
     round: 1,
     totalRounds: 5,
     estimatedPrice: '',
     answer: 0,
-    answered: false,
+    answered: true,
     time: 10,
     totalTime: 10,
     players: [
@@ -198,7 +201,27 @@ export default {
     }
   }),
   created () {
-    
+    // Leave if not logged in
+    if (!this.$store.getters['session/isLoggedIn']) {
+      this.$router.push('/')
+      return
+    }
+
+    // Socket listeners
+    this.socket = this.$store.getters['session/gameSocket']
+    this.socket.on('RoundStart', (message) => {
+      this.newItem(message.name, message.image)
+    })
+    this.socket.on('score', (message) => {
+      this.players = message
+    })
+    this.socket.on('clock', (message) => {
+      this.time = message
+      // Automatic client answer
+      if (message === 3) {
+        this.socket.emit('answer', 3000)
+      }
+    })
   },
   methods: {
     /**
@@ -221,6 +244,12 @@ export default {
       this.answered = false
       this.answer = 0
       this.time = this.totalTime
+    },
+    /**
+     * Tell the server that the image has been displayed
+     */
+    ready () {
+      this.socket.emit('ready')
     },
     /**
      * Creates a new game with the same players.
