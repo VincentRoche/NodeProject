@@ -28,12 +28,12 @@ mongoose.connect(globalInfo[0], { useNewUrlParser: true, useUnifiedTopology: tru
 })()
 
 app.post('/acc', (req, res) => {
-  let newUser = new User({ username: req.body.username, password: req.body.password })
+  const newUser = new User({ username: req.body.username, password: req.body.password })
   newUser.save().then(async () => res.send('User saved.')).catch(err => res.send(returnUserValidationErrors(err)))
 })
 
 app.post('/log', (req, res) => {
-  let userToFind = new User({ username: req.body.username, password: req.body.password })
+  const userToFind = new User({ username: req.body.username, password: req.body.password })
   userToFind.validate().then(() =>
     User.findOne({ username: req.body.username, password: req.body.password }).then(user => {
       if (user) res.send('User logged in.')
@@ -84,10 +84,6 @@ app.get('/', (req, res) => {
   res.json({
     message: 'Behold The MEVN Stack!'
   })
-})
-
-app.get('/socket', (req, res) => {
-  res.json(game.getHostNumber())
 })
 
 const port = process.env.PORT || 4000

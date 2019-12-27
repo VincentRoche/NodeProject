@@ -27,40 +27,90 @@ class GamesHandler {
    */
   addEvents () {
     const games = this.pendingGames
+    const self = this
     this.io.on('connection', function (socket) {
       socket.on('joinGame', function (message) {
-        if (games[message.gameNumber]) {
-          games[message.gameNumber].addPlayer(new Player(message.name, socket))
-          console.log('Player', message.name, 'joined game n°', message.gameNumber)
+        if (games[message.gameNumber] && !games[message.gameNumber].started) {
+          if (games[message.gameNumber].addPlayer(new Player(message.name, socket))) {
+            this.emit('errorGameFull')
+          } else {
+            this.emit('gameJoined')
+            console.log('Player', message.name, 'joined game n°', message.gameNumber)
+          }
+        } else if (!games[message.gameNumber]) {
+          this.emit('errorNotExist')
+        } else if (games[message.gameNumber].started) {
+          this.emit('errorAlreadyStarted')
         }
       })
-      socket.on('hostGame', function (hostNumber) {
-        games[hostNumber] = new Game(hostNumber)
-      })
-      socket.on('disconnect', function () {
-        this.disconnect()
-        console.log('Player disconnected')
+      socket.on('hostGame', function () {
+        const newGame = self.getHostNumber(socket, self)
+        console.log('newgame', newGame)
+        games[newGame].addPlayer(new Player('Host', socket))
+        this.emit('gameNumber', { gameNumber: newGame })
       })
     })
   }
 
-  getHostNumber () {
-    const newGame = parseInt(Object.keys(this.pendingGames)[Object.keys(this.pendingGames).length - 1]) + 1
-    return newGame || 1
+  getHostNumber (hostSocket, self) {
+    let newGame = Math.floor(Math.random() * 3000)
+    if (Object.keys(self.pendingGames).includes(newGame)) {
+      newGame = null
+    } else {
+      self.pendingGames[newGame] = new Game(hostSocket)
+    }
+    return newGame || self.getHostNumber()
   }
 }
 
 class Game {
-  constructor () {
+  constructor (hostSocket) {
     this.players = []
     this.maxPlayers = 2
     this.nbRounds = 3
+    this.roundDuration = 10
+    this.started = false
+    this.hostSocket = hostSocket
+    const self = this
+    this.hostSocket.on('GameStart', function () {
+      console.log('startGame')
+      self.sendAll('GameStart')
+      self.startGame()
+    })
+    this.hostSocket.on('settingsUpdate', function (settings) {
+      self.updateSettings(settings)
+    })
   }
 
   addPlayer (player) {
+    if (this.players.length + 1 > this.maxPlayers) {
+      return false
+    }
+    const self = this
+    // deconnection event added
+    player.socket.on('disconnect', function () {
+      self.removePlayer(player)
+    })
     this.players.push(player)
-    if (this.players.length === this.maxPlayers) {
-      this.startGame()
+    return true
+  }
+
+  removePlayer (player) {
+    this.players = this.players.filter(e => e.name !== player.name)
+    player.socket.disconnect()
+    console.log(`Player ${player.name} disconnected`)
+  }
+
+  updateSettings (settings) {
+    this.maxPlayers = settings.maxPlayers | this.maxPlayers
+    this.nbRounds = settings.rounds | this.nbRounds
+    this.roundDuration = settings.roundDuration | this.roundDuration
+    this.sendAll('settingsUpdated', settings)
+  }
+
+  sendAll (messageType, messageContent = {}) {
+    for (const player of this.players) {
+      player.socket.emit(messageType, messageContent)
     }
   }
 
@@ -84,10 +134,9 @@ class Game {
   }
 
   startGame () {
+    this.started = true
     // get nbRounds Objects
-    for (const player of this.players) {
-      player.socket.emit('GameStart')
-    }
+    this.sendAll('GameStart')
     // for (round of this.nbRounds) {
     //     this.startRound({name:'patate', image: 'patate.jpg'})
     // }
@@ -125,16 +174,14 @@ class Game {
         player.score += score--
       }
     }
-
-    for (const player of this.players) {
-      const scoreboard = this.generateScoreBoard()
-      player.socket.emit('score', scoreboard)
-    }
+    const scoreboard = this.generateScoreBoard()
+    this.sendAll('score', scoreboard)
   }
 
   async compareAnswers (answerPromises, clock, price) {
     return new Promise(async (resolve, reject) => {
       let results = await Promise.all(answerPromises)
+      console.log(results)
       clock.stop()
       results = results.map(a => {
         if (a.mess !== 0) {
@@ -176,11 +223,6 @@ class Game {
       setTimeout(reject, 4000, { status: 'connection error', player: player })
     })
   }
-
-  removeElement (player) {
-    this.players = this.players.filter(e => e.name !== player.name)
-    player.socket.disconnect()
-  }
 }
 
 class Player {
@@ -188,7 +230,7 @@ class Player {
    * @param {String} name
    * @param {Socket} socket
    */
-  constructor (name, socket) {
+  constructor (name, socket, host) {
     /** @member {String} */
     this.name = name
     /** @member {Socket} */
