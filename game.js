@@ -1,8 +1,7 @@
 const models = require('./mongoosestructures.js')
 // const mongoose = require('mongoose')
-// const globalInfo = require('./globalinfo.js')
+const globalInfo = require('./globalinfo.js')
 const Product = models[0]
-
 // mongoose.connect(globalInfo[0], { useNewUrlParser: true, useUnifiedTopology: true })
 
 class GamesHandler {

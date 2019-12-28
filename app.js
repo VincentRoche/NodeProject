@@ -5,8 +5,8 @@ const morgan = require('morgan')
 const app = express()
 // const fs = require('fs')
 const mongoose = require('mongoose')
-
 const globalInfo = require('./globalinfo.js')
+const sha256 = require('sha256')
 
 const models = require('./mongoosestructures.js')
 const Product = models[0]
@@ -36,8 +36,15 @@ app.post('/log', (req, res) => {
   const userToFind = new User({ username: req.body.username, password: req.body.password })
   userToFind.validate().then(() =>
     User.findOne({ username: req.body.username, password: req.body.password }).then(user => {
-      if (user) res.send('User logged in.')
-      else res.send('User doesn\'t exist.')
+      if (user) {
+        let sessionID
+        while (globalInfo[2].includes(sessionID) || !sessionID) {
+          let randomString = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+          sessionID = sha256(randomString)
+        }
+        globalInfo[2].push({ username: req.body.username, sessionID: sessionID })
+        res.send(sessionID)
+      } else res.send(['User doesn\'t exist.'])
     })).catch(err => res.send(returnUserValidationErrors(err)))
 })
 

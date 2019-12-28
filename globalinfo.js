@@ -1,4 +1,5 @@
 const connectionString = 'mongodb+srv://GaetanNOBRE:gFeF74p62nqLUFy3@nodejscluster-dvon1.azure.mongodb.net/JustePrix?retryWrites=true&w=majority'
+let sessionIDs = []
 const databaseProducts = [
   { _id: 1, name: 'Rafale M', price: 78000000 },
   { _id: 2, name: 'Titre de Lord de Sealand', price: 37 },
@@ -21,4 +22,4 @@ const databaseProducts = [
   { _id: 19, name: 'Support de brosses à dent avec ventouse', price: 1 },
   { _id: 20, name: 'Saxophone Soprano courbé EAGLETONE ROAD CSS100', price: 429 }
 ]
-module.exports = [connectionString, databaseProducts]
+module.exports = [connectionString, databaseProducts, sessionIDs]
