@@ -45,67 +45,51 @@
             <!-- Max players -->
             <v-slider
               v-model="maxPlayers"
-              class="align-center"
+              class="pt-1"
               max="50"
               :min="Math.max(2, players.length)"
               hide-details
               label="Max players"
+              thumb-label="always"
+              thumb-size="24"
               :disabled="!isGameAdmin"
             >
-              <template v-slot:append>
-                <v-text-field
-                  v-model="maxPlayers"
-                  class="mt-0 pt-0"
-                  hide-details
-                  single-line
-                  type="number"
-                  style="width: 50px"
-                ></v-text-field>
+              <template v-slot:append v-if="!isGameAdmin">
+                <p class="ma-0 pt-1">{{ maxPlayers }}</p>
               </template>
             </v-slider>
             
             <!-- Number of rounds -->
             <v-slider
               v-model="rounds"
-              class="align-center"
+              class="pt-5"
               max="50"
               min="1"
               hide-details
               label="Rounds"
+              thumb-label="always"
+              thumb-size="24"
               :disabled="!isGameAdmin"
             >
-              <template v-slot:append>
-                <v-text-field
-                  v-model="rounds"
-                  class="mt-0 pt-0"
-                  hide-details
-                  single-line
-                  type="number"
-                  style="width: 50px"
-                ></v-text-field>
+              <template v-slot:append v-if="!isGameAdmin">
+                <p class="ma-0 pt-1">{{ rounds }}</p>
               </template>
             </v-slider>
             
             <!-- Round duration -->
             <v-slider
               v-model="roundDuration"
-              class="align-center"
+              class="pt-5"
               max="60"
               min="2"
               hide-details
-              label="Round duration"
+              label="Round duration (s)"
+              thumb-label="always"
+              thumb-size="24"
               :disabled="!isGameAdmin"
             >
-              <template v-slot:append>
-                <v-text-field
-                  v-model="roundDuration"
-                  class="mt-0 pt-0"
-                  hide-details
-                  single-line
-                  type="number"
-                  style="width: 50px"
-                  suffix="s"
-                ></v-text-field>
+              <template v-slot:append v-if="!isGameAdmin">
+                <p class="ma-0 pt-1">{{ roundDuration }}</p>
               </template>
             </v-slider>
           </v-card-text>
