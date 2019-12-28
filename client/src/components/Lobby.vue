@@ -161,24 +161,21 @@ export default {
     // Create the game if the user wants to
     if (this.$route.params.gameNumber === 'new') {
       // Create a new game and make this user admin
-      // Faire la requête de création de partie, récupérer le numéro...
-      const self = this
       this.socket.emit('hostGame')
-      this.socket.on('gameNumber', function(message){
-        if(message.gameNumber) {
-          self.gameNumber = message.gameNumber
-          self.isGameAdmin = true
+      this.socket.on('gameNumber', (message) => {
+        if (message.gameNumber) {
+          this.gameNumber = message.gameNumber
+          this.isGameAdmin = true
         } else {
           //  voir ce qu'on fait si ça marche pas
         }
       })
     } else {
       this.gameNumber = this.$route.params.gameNumber
-      this.socket.on('settingsUpdated', function(settings) {
-        this.maxPlayers = settings.maxPlayers | this.maxPlayers
-        this.rounds = settings.rounds | this.rounds
-        this.roundDuration = settings.roundDuration | this.roundDuration
-        alert(this.roundDuration)
+      this.socket.on('settingsUpdated', (settings) => {
+        this.maxPlayers = settings.maxPlayers ? settings.maxPlayers : this.maxPlayers
+        this.rounds = settings.rounds ? settings.rounds : this.rounds
+        this.roundDuration = settings.roundDuration ? settings.roundDuration : this.roundDuration
       })
     }
 
@@ -225,16 +222,17 @@ export default {
      * Sends the new game settings to the server
      */
     updateSettings (setting) {
-      // Faire la requête qui envoie les nouveaux réglages au serveur pour les afficher chez les autres...
-      let settings = {}
-      if (setting === 1) {
-        settings.maxPlayers = this.maxPlayers
-      } else if (setting === 2) {
-        settings.rounds = this.rounds
-      } else if (setting === 3) {
-        settings.roundDuration = this.roundDuration
+      if (this.isGameAdmin) {
+        let settings = {}
+        if (setting === 1) {
+          settings.maxPlayers = this.maxPlayers
+        } else if (setting === 2) {
+          settings.rounds = this.rounds
+        } else if (setting === 3) {
+          settings.roundDuration = this.roundDuration
+        }
+        this.socket.emit('settingsUpdate', settings)
       }
-      this.socket.emit('settingsUpdate', settings)
     }
   }
 }
