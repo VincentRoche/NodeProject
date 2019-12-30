@@ -161,27 +161,28 @@ export default {
         this.rounds = settings.rounds ? settings.rounds : this.rounds
         this.roundDuration = settings.roundDuration ? settings.roundDuration : this.roundDuration
       })
+      let errorAlreadyStarted = false // True if the game is already started
+      let errorNotExist = false // True if the game is already started
+      // Faire la requête de rejoignage de la partie avec le numéro donné...
+      this.socket.emit('joinGame', { name: this.$store.state.session.username, gameNumber: this.gameNumber })
+
+      if (errorAlreadyStarted || errorNotExist)
+      {
+        if (errorAlreadyStarted)
+          alert('This game is already started.')
+        else if (errorNotExist)
+          alert('There is no game with the number you entered.')
+        this.$router.push('/')
+      }
+      else
+      {
+        //
+      }
     }
 
     // Join the game
     
-    let errorAlreadyStarted = false // True if the game is already started
-    let errorNotExist = false // True if the game is already started
-    // Faire la requête de rejoignage de la partie avec le numéro donné...
-    this.socket.emit('joinGame', { name: this.$store.state.session.username, gameNumber: this.gameNumber })
-
-    if (errorAlreadyStarted || errorNotExist)
-    {
-      if (errorAlreadyStarted)
-        alert('This game is already started.')
-      else if (errorNotExist)
-        alert('There is no game with the number you entered.')
-      this.$router.push('/')
-    }
-    else
-    {
-      //
-    }
+    
   },
   watch: {
     maxPlayers () {

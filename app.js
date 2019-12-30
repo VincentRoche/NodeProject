@@ -39,10 +39,10 @@ app.post('/log', (req, res) => {
       if (user) {
         let sessionID
         while (globalInfo[2].includes(sessionID) || !sessionID) {
-          let randomString = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+          const randomString = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
           sessionID = sha256(randomString)
         }
-        globalInfo[2].push({ username: req.body.username, sessionID: sessionID })
+        globalInfo[2][sessionID] = req.body.username
         res.send(sessionID)
       } else res.send(['User doesn\'t exist.'])
     })).catch(err => res.send(returnUserValidationErrors(err)))
