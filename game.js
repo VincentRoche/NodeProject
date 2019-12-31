@@ -34,6 +34,7 @@ class GamesHandler {
             this.emit('errorGameFull')
           } else {
             this.emit('gameJoined')
+            this.emit('players', this.getPlayers())
             console.log('Player', globalinfo[2][this.handshake.query.sessionId], 'joined game n°', message.gameNumber)
           }
         } else if (!games[message.gameNumber]) {
@@ -115,6 +116,14 @@ class Game {
     } 
   }
 
+  getPlayers () {
+    let toReturn = []
+    for (const player of this.players) {
+      toReturn.push(globalinfo[2][player.socket.handshake.query.sessionId])
+    }
+    return toReturn
+  }
+
   sendAll (messageType, messageContent = {}) {
     for (const player of this.players) {
       player.socket.emit(messageType, messageContent)
@@ -149,6 +158,7 @@ class Game {
     // }
     const clock = new Clock(this.players, 10)
     this.startRound({ name: 'patate', image: 'https://upload.wikimedia.org/wikipedia/commons/a/a3/234_Solanum_tuberosum_L.jpg', price: 100 }, clock)
+    this.sendAll('GameEnd')
   }
 
   async startRound (object, clock) {
