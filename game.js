@@ -158,7 +158,7 @@ class Game {
     // for (round of this.nbRounds) {
     //     this.startRound({name:'patate', image: 'patate.jpg'})
     // }
-    const clock = new Clock(this.players, 10)
+    const clock = new Clock(this.players, this.roundDuration)
     this.startRound({ name: 'patate', image: 'https://upload.wikimedia.org/wikipedia/commons/a/a3/234_Solanum_tuberosum_L.jpg', price: 100 }, clock)
     this.sendAll('GameEnd')
   }

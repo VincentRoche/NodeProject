@@ -215,10 +215,6 @@ export default {
     })
     this.socket.on('clock', (message) => {
       this.time = message
-      // Automatic client answer
-      if (message === 3) {
-        this.socket.emit('answer', 3000)
-      }
     })
   },
   methods: {
@@ -228,7 +224,7 @@ export default {
     sendPrice () {
       if (this.estimatedPrice > 0) {
         this.answered = true
-
+        this.socket.emit('answer', this.estimatedPrice)
       }
     },
     /**
