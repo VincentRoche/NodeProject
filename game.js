@@ -77,7 +77,6 @@ class Game {
     const self = this
     this.hostSocket.on('GameStart', function () {
       console.log('startGame')
-      self.sendAll('GameStart', self.getSettings())
       self.startGame()
     })
     this.hostSocket.on('settingsUpdate', function (settings) {
@@ -155,7 +154,7 @@ class Game {
   startGame () {
     this.started = true
     // get nbRounds Objects
-    this.sendAll('GameStart')
+    this.sendAll('GameStart', this.getSettings())
     // for (round of this.nbRounds) {
     //     this.startRound({name:'patate', image: 'patate.jpg'})
     // }
