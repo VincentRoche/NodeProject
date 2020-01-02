@@ -28,6 +28,7 @@
       <v-row justify="center">
         <v-col sm="6" md="4" lg="2">
           <p class="font-weight-medium">Join a game:</p>
+          <v-alert type="error" v-if="$route.query.error">{{ errors[$route.query.error] }}</v-alert>
           <v-form @submit="joinGame">
             <v-text-field
               v-model="gameNumber"
@@ -70,7 +71,12 @@
 export default {
   data: () => ({
     gameNumber: '',
-    joinLoading: false
+    joinLoading: false,
+    errors: {
+      errorGameFull: 'Sorry, this game is full.',
+      errorNotExist: 'There is no game with the number you entered.',
+      errorAlreadyStarted: 'This game is already started.'
+    }
   }),
   methods: {
     /**

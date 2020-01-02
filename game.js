@@ -29,17 +29,19 @@ class GamesHandler {
     const self = this
     this.io.on('connection', function (socket) {
       socket.on('joinGame', function (message) {
-        if (games[message.gameNumber] && !games[message.gameNumber].started) {
+        const game = games[message.gameNumber]
+        if (game && !game.started) {
           if (!games[message.gameNumber].addPlayer(new Player(socket))) {
             this.emit('errorGameFull')
           } else {
             this.emit('gameJoined')
-            this.emit('players', this.getPlayers())
+            game.sendAll('players', game.getPlayers())
+            this.emit('settingsUpdated', game.getSettings())
             console.log('Player', globalinfo[2][this.handshake.query.sessionId], 'joined game n°', message.gameNumber)
           }
-        } else if (!games[message.gameNumber]) {
+        } else if (!game) {
           this.emit('errorNotExist')
-        } else if (games[message.gameNumber].started) {
+        } else if (game.started) {
           this.emit('errorAlreadyStarted')
         }
       })
@@ -48,6 +50,7 @@ class GamesHandler {
         console.log('newgame', newGame)
         games[newGame].addPlayer(new Player(socket))
         this.emit('gameNumber', { gameNumber: newGame })
+        this.emit('players', games[newGame].getPlayers())
       })
     })
   }
@@ -66,8 +69,8 @@ class GamesHandler {
 class Game {
   constructor (hostSocket) {
     this.players = []
-    this.maxPlayers = 2
-    this.nbRounds = 3
+    this.maxPlayers = 30
+    this.nbRounds = 5
     this.roundDuration = 10
     this.started = false
     this.hostSocket = hostSocket
@@ -113,7 +116,7 @@ class Game {
       maxPlayers: this.maxPlayers,
       rounds: this.nbRounds,
       roundDuration: this.roundDuration
-    } 
+    }
   }
 
   getPlayers () {

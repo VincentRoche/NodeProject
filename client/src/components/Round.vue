@@ -28,7 +28,7 @@
                   :rotate="-90"
                   :size="100"
                   :width="15"
-                  :value="time / totalTime * 100"
+                  :value="time / $store.state.game.roundDuration * 100"
                   :color="time > 3 ? 'green' : 'red'"
                   class="title"
                 >
@@ -101,7 +101,7 @@
           tile
         >
           <!-- Round number -->
-          <v-card-title>Round {{ round }} of {{ totalRounds }}</v-card-title>
+          <v-card-title>Round {{ round }} of {{ $store.state.game.rounds }}</v-card-title>
 
           <!-- Rankings -->
           <v-card-text>
@@ -182,12 +182,10 @@ export default {
     itemName: '',
     imageUrl: '',
     round: 1,
-    totalRounds: 5,
     estimatedPrice: '',
     answer: 0,
     answered: true,
-    time: 10,
-    totalTime: 10,
+    time: 0,
     players: [
       { id:0, name:'Jacques Chirac', score: 77 },
       { id:1, name:'Valéry Giscard d\'Estaing', score: 33 },
@@ -243,7 +241,7 @@ export default {
       this.estimatedPrice = ''
       this.answered = false
       this.answer = 0
-      this.time = this.totalTime
+      this.time = this.$store.state.game.roundDuration
     },
     /**
      * Tell the server that the image has been displayed

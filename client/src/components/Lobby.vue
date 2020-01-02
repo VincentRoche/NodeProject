@@ -22,7 +22,7 @@
             <div class="d-flex flex-wrap">
               <v-card
                 v-for="player in this.players"
-                :key="player.id"
+                :key="player.name"
                 class="pa-2 ma-2"
                 outlined
               >
@@ -118,11 +118,7 @@ export default {
   data: () => ({
     socket: null,
     gameNumber: 0,
-    players: [
-      { id:0, name:'Jacques Chirac' },
-      { id:1, name:'Valéry Giscard d\'Estaing' },
-      { id:2, name:'Georges Pompidou' }
-    ],
+    players: [],
     maxPlayers: 30,
     rounds: 5,
     roundDuration: 10,
@@ -138,7 +134,15 @@ export default {
 
     // Socket listeners
     this.socket = this.$store.getters['session/gameSocket']
-    this.socket.on('GameStart', () => {
+    this.socket.on('players', (message) => {
+      // Update player list
+      this.players = message.map((p) => { return { name: p } })
+    })
+    this.socket.on('GameStart', (message) => {
+      // Save game settings
+      this.$store.commit('game/setGameNumber', { gameNumber: message.gameNumber })
+      this.$store.commit('game/setGameSettings', { rounds: message.rounds, roundDuration: message.roundDuration })
+      // Start game
       this.$router.push('/round')
     })
 
@@ -156,28 +160,25 @@ export default {
       })
     } else {
       this.gameNumber = this.$route.params.gameNumber
+      
+      this.socket.emit('joinGame', { name: this.$store.state.session.username, gameNumber: this.gameNumber })
+
+      this.socket.on('errorGameFull', () => {
+        this.$router.push('/?error=errorGameFull')
+      })
+      this.socket.on('errorNotExist', () => {
+        this.$router.push('/?error=errorNotExist')
+      })
+      this.socket.on('errorAlreadyStarted', () => {
+        this.$router.push('/?error=errorAlreadyStarted')
+      })
+
+      // Update displayed game settings when then host edits them
       this.socket.on('settingsUpdated', (settings) => {
         this.maxPlayers = settings.maxPlayers ? settings.maxPlayers : this.maxPlayers
         this.rounds = settings.rounds ? settings.rounds : this.rounds
         this.roundDuration = settings.roundDuration ? settings.roundDuration : this.roundDuration
       })
-      let errorAlreadyStarted = false // True if the game is already started
-      let errorNotExist = false // True if the game is already started
-      // Faire la requête de rejoignage de la partie avec le numéro donné...
-      this.socket.emit('joinGame', { name: this.$store.state.session.username, gameNumber: this.gameNumber })
-
-      if (errorAlreadyStarted || errorNotExist)
-      {
-        if (errorAlreadyStarted)
-          alert('This game is already started.')
-        else if (errorNotExist)
-          alert('There is no game with the number you entered.')
-        this.$router.push('/')
-      }
-      else
-      {
-        //
-      }
     }
 
     // Join the game

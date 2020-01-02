@@ -76,16 +76,7 @@ export default {
       async tryToLogin() {
         if (this.$refs.form.validate()) {
             this.loading = true
-
-            // Cette requête pour se connecter te renvoie les messages suivants :
-            // Soit une erreur liée au schema mongoose genre 'Username must not be empty.'
-            // Soit 'User doesn't exist.'
-            // Soit 'User logged in.'
-            // Faut passer à la suite seulement si tu reçois 'User logged in.'
-            // messages présents dans res.data
-            // En sachant qu'à chaque fois je te renvoie un tableau de string
-            // parce que tu peux avoir plusieurs erreurs en même temps
-            // donc si tu veux tu peux faire une sorte de 'liste' à afficher à côté
+            
             const result = await this.axios.post('http://localhost:4000/log', {
                 username: this.username,
                 password: this.password
@@ -95,24 +86,14 @@ export default {
             this.loading = false
 
             // If there are errors, display them
-            if(result.data instanceof Array) {
+            if (result.data instanceof Array) {
                 this.errors = result.data
             }
             else {
                 // If successful, save session and redirect
-                this.$store.commit('session/login', { sessionId: result.data, username: this.username }) // TODO: Mettre le numéro de session renvoyé par la requête d'avant
+                this.$store.commit('session/login', { sessionId: result.data, username: this.username })
                 this.$router.push('/') // Back to the home page
             }
-            /*
-            // If there are errors, display them
-            if (result.data !== 'User logged in.') {
-                this.errors = result.data
-            } else {
-                // If successful, save session and redirect
-                this.$store.commit('session/login', { sessionId: 1, username: this.username }) // TODO: Mettre le numéro de session renvoyé par la requête d'avant
-                this.$router.push('/') // Back to the home page
-            }
-            */
         }
       }
   }
