@@ -211,7 +211,8 @@ export default {
       this.newItem(message.name, message.image)
     })
     this.socket.on('score', (message) => {
-      this.players = message
+      this.players = message.newScore
+      this.answer = message.price
     })
     this.socket.on('clock', (message) => {
       this.time = message
