@@ -216,6 +216,9 @@ export default {
     this.socket.on('clock', (message) => {
       this.time = message
     })
+    this.socket.on('GameEnd', () => {
+      //this.showFinalResults = true
+    })
   },
   methods: {
     /**
