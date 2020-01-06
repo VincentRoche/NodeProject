@@ -142,6 +142,8 @@ export default {
       // Save game settings
       this.$store.commit('game/setGameNumber', { gameNumber: message.gameNumber })
       this.$store.commit('game/setGameSettings', { rounds: message.rounds, roundDuration: message.roundDuration })
+      // Save players
+      this.$store.commit('game/setPlayers', { players: message.players })
       // Start game
       this.$router.push('/round')
     })

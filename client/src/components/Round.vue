@@ -220,6 +220,9 @@ export default {
     this.socket.on('GameEnd', () => {
       //this.showFinalResults = true
     })
+
+    // Fill player list
+    this.players = this.$store.state.game.players.map(p => { return { name: p, score: 0 } })
   },
   methods: {
     /**
