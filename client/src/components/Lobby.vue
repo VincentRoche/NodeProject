@@ -185,6 +185,12 @@ export default {
     
     
   },
+  async destroyed () {
+    if (this.$route.path !== '/round') {
+      // Leave the game
+      this.socket.emit('leaveGame')
+    }
+  },
   watch: {
     maxPlayers () {
       this.updateSettings(1)
