@@ -1,15 +1,13 @@
 <template>
   <v-container
-    class="mt-12"
+    class="mt-6"
     fluid
     text-center
   >
 
     <v-row justify="center">
       <v-col md="8">
-        <h1 class="display-2 font-weight-bold mb-3">
-          Welcome to EPIC JUSTE PRIX 3000
-        </h1>
+        <v-img src="@/assets/lagaf.jpg" max-height="400" contain></v-img>
       </v-col>
     </v-row>
 
