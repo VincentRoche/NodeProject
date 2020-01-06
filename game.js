@@ -4,12 +4,25 @@ const globalinfo = require('./globalinfo.js')
 const Product = models[0]
 // mongoose.connect(globalInfo[0], { useNewUrlParser: true, useUnifiedTopology: true })
 
+function packetChecking (packet, next) {
+  packet[0] = escape(packet[0])
+  if (packet[1]) {
+    for (const elem of Object.keys(packet[1])) {
+      if (elem === 'name') {
+        packet[1][elem] = escape(packet[1][elem])
+      } else if (!/^[0-9]+$/.test(packet[1][elem])) {
+        packet[1][elem] = 0
+      }
+    }
+  }
+  next()
+}
+
 class GamesHandler {
   constructor (server) {
     /** @member {Array<Game>} */
     this.pendingGames = {}
     this.io = require('socket.io')(server, {
-      // path: '/game',
       pingInterval: 2000,
       pingTimeout: 4000
     })
@@ -28,6 +41,7 @@ class GamesHandler {
     const games = this.pendingGames
     const self = this
     this.io.on('connection', function (socket) {
+      socket.use(packetChecking)
       socket.on('joinGame', function (message) {
         const game = games[message.gameNumber]
         if (game && !game.started) {
@@ -89,8 +103,12 @@ class Game {
       return false
     }
     const self = this
-    // deconnection event added
+    // impromptuous disconnection
     player.socket.on('disconnect', function () {
+      self.removePlayer(player)
+    })
+    // wanted disconnection
+    player.socket.on('leaveGame', function () {
       self.removePlayer(player)
     })
     this.players.push(player)
@@ -99,8 +117,9 @@ class Game {
 
   removePlayer (player) {
     this.players = this.players.filter(e => e.socket.handshake.query.sessionId !== player.socket.handshake.query.sessionId)
-    player.socket.disconnect()
-    console.log(`Player ${player.name} disconnected`)
+    const name = globalinfo[2][player.socket.handshake.query.sessionId]
+    player.socket.removeAllListeners().disconnect()
+    console.log(`Player ${name} disconnected`)
   }
 
   updateSettings (settings) {
@@ -119,7 +138,7 @@ class Game {
   }
 
   getPlayers () {
-    let toReturn = []
+    const toReturn = []
     for (const player of this.players) {
       toReturn.push(globalinfo[2][player.socket.handshake.query.sessionId])
     }
@@ -154,10 +173,10 @@ class Game {
   startGame () {
     this.started = true
     // get nbRounds Objects
-    this.sendAll('GameStart', this.getSettings())
-    // for (round of this.nbRounds) {
-    //     this.startRound({name:'patate', image: 'patate.jpg'})
-    // }
+    this.sendAll('GameStart', { settings: this.getSettings(), players: this.getPlayers() })
+    for (let round = 1; round <= this.nbRounds; round++) {
+      this.startRound({ round: round, name: 'patate', image: 'patate.jpg' })
+    }
     const clock = new Clock(this.players, this.roundDuration)
     this.startRound({ name: 'patate', image: 'https://upload.wikimedia.org/wikipedia/commons/a/a3/234_Solanum_tuberosum_L.jpg', price: 100 }, clock)
     this.sendAll('GameEnd')
