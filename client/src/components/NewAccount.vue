@@ -114,11 +114,11 @@ export default {
                 this.loading = false
 
                 // If there are errors, display them
-                if (result.data !== 'User saved.') {
+                if (result.data instanceof Array) {
                     this.errors = result.data
                 } else {
                     // If the account was created, log in and redirect
-                    this.$store.commit('session/login', { sessionId: 1, username: this.username }) // TODO: Mettre le numéro de session renvoyé par la requête d'avant
+                    this.$store.commit('session/login', { sessionId: result.data, username: this.username }) // TODO: Mettre le numéro de session renvoyé par la requête d'avant
                     this.$router.push('/') // Back to the home page
                 }
             }
