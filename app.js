@@ -21,6 +21,8 @@ app.use(morgan('tiny'))
 app.use(cors())
 app.use(bodyParser.json())
 
+const path = require('path')
+
 // Connection to the database
 mongoose.connect(globalInfo[0], { useNewUrlParser: true, useUnifiedTopology: true })
 
@@ -132,6 +134,5 @@ function getFileName (name) {
   }
   return -1
 }
-
-app.use(express.static(__dirname + '/productPictures'))
 */
+app.use(express.static(path.join(__dirname, '/client')))
