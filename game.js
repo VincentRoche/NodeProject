@@ -238,7 +238,7 @@ class Game {
   score (answers, price) {
     let score = answers.length
     for (const answer of answers) {
-      if (answer.mess >= 0) {
+      if (answer.mess > 0) {
         answer.player.score += score
         score--
       }
