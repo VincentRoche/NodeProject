@@ -135,8 +135,8 @@
           <v-toolbar-title>Final results</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
-            <v-btn dark text @click="newGame">New game with the same players</v-btn>
-            <v-btn dark text @click="quit">Quit</v-btn>
+            <!--<v-btn dark text @click="newGame">New game with the same players</v-btn>-->
+            <v-btn dark text @click="quit">Home</v-btn>
           </v-toolbar-items>
         </v-toolbar>
 
