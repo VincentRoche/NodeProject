@@ -117,7 +117,7 @@
                     <v-chip>{{ index + 1 }}</v-chip>
                   </v-col>
                   <v-col>
-                    <p class="mb-0 subtitle-1">{{ player.name }}</p>
+                    <p class="mb-0 subtitle-1">{{ player.name }} <v-chip x-small color="purple" dark v-if="lastAnswers[player.name]">{{ lastAnswers[player.name] }}</v-chip></p>
                     <p class="mb-0 subtitle-2">{{ player.score }}</p>
                   </v-col>
                 </v-row>
@@ -135,8 +135,8 @@
           <v-toolbar-title>Final results</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
-            <v-btn dark text @click="newGame">New game with the same players</v-btn>
-            <v-btn dark text @click="quit">Quit</v-btn>
+            <!--<v-btn dark text @click="newGame">New game with the same players</v-btn>-->
+            <v-btn dark text @click="quit">Home</v-btn>
           </v-toolbar-items>
         </v-toolbar>
 
@@ -185,6 +185,7 @@ export default {
     estimatedPrice: '',
     answer: 0,
     answered: true,
+    lastAnswers: [],
     time: 0,
     players: [
       { id:0, name:'Jacques Chirac', score: 77 },
@@ -213,6 +214,10 @@ export default {
     this.socket.on('score', (message) => {
       this.players = message.newScore
       this.answer = message.price
+      this.lastAnswers = {}
+      for (const a of message.lastAnswers) {
+        this.lastAnswers[a.name] = a.answer
+      }
     })
     this.socket.on('clock', (message) => {
       this.time = message
@@ -247,6 +252,7 @@ export default {
       this.estimatedPrice = ''
       this.answered = false
       this.answer = 0
+      this.lastAnswers = []
       this.time = this.$store.state.game.roundDuration
     },
     /**

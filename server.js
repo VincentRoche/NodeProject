@@ -63,9 +63,11 @@ app.post('/log', (req, res) => {
   // If valid, we try to retrieve it from database
     let foundUser = await User.findOne({ username: req.body.username, password: req.body.password })
     if (foundUser) { // If found, generation/sending of a session ID
-      let sessionId = generateSessionId()
-      globalInfo[2][sessionId] = req.body.username
-      res.send(sessionId)
+      if (!userAlreadyConnected(req.body.username)) { // If user not already connected
+        let sessionId = generateSessionId()
+        globalInfo[2][sessionId] = req.body.username
+        res.send(sessionId)
+      } else res.send(['User already connected.'])
     } else res.send(['User doesn\'t exist.']) // Else, user doesn't exist
   }).catch(err => res.send(returnUserValidationErrors(err))) // Else, we send errors
 })
@@ -100,6 +102,13 @@ async function fillProducts () {
       await createProduct(p._id, p.name, p.price)
     }
   }
+}
+
+function userAlreadyConnected (username) {
+  for (const i in globalInfo[2]) {
+    if (globalInfo[2][i] === username) return true
+  }
+  return false
 }
 
 // To get and return errors
