@@ -5,7 +5,7 @@ const databaseProducts = [
   { _id: 2, name: 'Titre de Lord de Sealand', price: 37 },
   { _id: 3, name: 'Vidéoprojecteur', price: 2500 },
   { _id: 4, name: 'Pelle 14 fonctions', price: 36 },
-  { _id: 5, name: 'Scooter Bar', price: 78000000 },
+  { _id: 5, name: 'Scooter Bar', price: 885 },
   { _id: 6, name: 'Mentos - Boîte de 40 rouleaux - goût fruit', price: 24 },
   { _id: 7, name: 'SPA Gonflable Carré', price: 449 },
   { _id: 8, name: 'Une M2 à l\'Epita', price: 10168 },
