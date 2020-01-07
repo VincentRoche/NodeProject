@@ -35,7 +35,10 @@ export default {
     //
   }),
   methods: {
-    logout () {
+    async logout () {
+      await this.axios.post(process.env.NODE_ENV === 'development' ? 'http://localhost:3000/logout' : '/logout', {
+          sessionId: this.$store.state.session.sessionId
+      })
       this.$store.commit('session/logout')
       this.$router.push('/')
     }

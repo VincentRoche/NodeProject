@@ -22,8 +22,10 @@ server.listen(port, function () {
 })
 
 const { GamesHandler } = require('./game.js')
-
-const game = new GamesHandler(io)
+const { SessionHandler } = require('./session.js')
+const sessions = new SessionHandler()
+console.log(sessions)
+const game = new GamesHandler(io, sessions)
 
 app.use(morgan('tiny'))
 app.use(cors({
@@ -49,8 +51,7 @@ app.post('/acc', (req, res) => {
   const newUser = new User({ username: req.body.username, password: req.body.password })
   newUser.save().then(() => { // If valid according to the mongoose schema
     // Generation/sending of a session ID
-    let sessionId = generateSessionId()
-    globalInfo[2][sessionId] = req.body.username
+    const sessionId = sessions.generateSessionId(req.body.username)
     res.send(sessionId)
   }).catch(err => res.send(returnUserValidationErrors(err))) // Else we send errors
 })
@@ -61,28 +62,21 @@ app.post('/log', (req, res) => {
   // To verify if valid according to mongoose schema
   userToFind.validate().then(async () => {
   // If valid, we try to retrieve it from database
-    let foundUser = await User.findOne({ username: req.body.username, password: req.body.password })
+    const foundUser = await User.findOne({ username: req.body.username, password: req.body.password })
     if (foundUser) { // If found, generation/sending of a session ID
-      if (!userAlreadyConnected(req.body.username)) { // If user not already connected
-        let sessionId = generateSessionId()
-        globalInfo[2][sessionId] = req.body.username
+      if (!sessions.isAlreadyConnected(req.body.username)) { // If user not already connected
+        console.log('here')
+        const sessionId = sessions.generateSessionId(req.body.username)
         res.send(sessionId)
       } else res.send(['User already connected.'])
     } else res.send(['User doesn\'t exist.']) // Else, user doesn't exist
   }).catch(err => res.send(returnUserValidationErrors(err))) // Else, we send errors
 })
 
-// To generate a session ID
-function generateSessionId () {
-  let sessionId
-  // To be sure we don't get an already in use session ID
-  while (globalInfo[2].includes(sessionId) || !sessionId) {
-    const randomString = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-    sessionId = sha256(randomString)
-  }
-  return sessionId
-}
-
+app.post('/logout', (req, res) =>{
+  sessions.destroySession(escape(req.body.sessionId))
+  res.send('logged out')
+})
 // To save a product in database
 async function createProduct (id, productName, productPrice) {
   return new Product({
@@ -104,18 +98,11 @@ async function fillProducts () {
   }
 }
 
-function userAlreadyConnected (username) {
-  for (const i in globalInfo[2]) {
-    if (globalInfo[2][i] === username) return true
-  }
-  return false
-}
-
 // To get and return errors
 function returnUserValidationErrors (err) {
   let usernameError = ''
   let passwordError = ''
-  let errors = []
+  const errors = []
 
   // If it is an error linked to the mongoose schema
   if (err.name === 'ValidationError') {

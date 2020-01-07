@@ -3,8 +3,7 @@ const models = require('./mongoosestructures.js')
 const globalinfo = require('./globalinfo.js')
 const Product = models[0]
 const fs = require('fs')
-
-// mongoose.connect(globalInfo[0], { useNewUrlParser: true, useUnifiedTopology: true })
+//  const { SessionHandler } = require('./session.js')
 
 function packetChecking (packet, next) {
   packet[0] = escape(packet[0])
@@ -37,9 +36,11 @@ function pause () {
 }
 
 class GamesHandler {
-  constructor (io) {
+  constructor (io, sessionHandler) {
     /** @member {Array<Game>} */
     this.pendingGames = {}
+    this.sessionHandler = sessionHandler
+    console.log("HANDLER", this.sessionHandler)
     this.io = io
     this.addEvents()
   }
@@ -64,7 +65,7 @@ class GamesHandler {
             this.emit('gameJoined')
             game.sendAll('players', game.getPlayers())
             this.emit('settingsUpdated', game.getSettings())
-            console.log('Player', globalinfo[2][this.handshake.query.sessionId], 'joined game n°', message.gameNumber)
+            console.log('Player', self.sessionHandler.getUsername(this.handshake.query.sessionId), 'joined game n°', message.gameNumber)
           }
         } else if (!game) {
           this.emit('errorNotExist')
@@ -87,20 +88,23 @@ class GamesHandler {
     if (Object.keys(self.pendingGames).includes(newGame)) {
       newGame = null
     } else {
-      self.pendingGames[newGame] = new Game(hostSocket)
+      console.log(self)
+      self.pendingGames[newGame] = new Game(hostSocket, self.sessionHandler)
     }
     return newGame || self.getHostNumber()
   }
 }
 
 class Game {
-  constructor (hostSocket) {
+  constructor (hostSocket, sessionHandler) {
     this.players = []
     this.maxPlayers = 30
     this.nbRounds = 5
     this.roundDuration = 10
     this.started = false
     this.hostSocket = hostSocket
+    this.sessionHandler = sessionHandler
+    console.log(sessionHandler)
     const self = this
     this.hostSocket.on('GameStart', function () {
       console.log('startGame')
@@ -153,7 +157,7 @@ class Game {
   getPlayers () {
     const toReturn = []
     for (const player of this.players) {
-      toReturn.push(globalinfo[2][player.socket.handshake.query.sessionId])
+      toReturn.push(this.sessionHandler.getUsername(player.socket.handshake.query.sessionId))
     }
     return toReturn
   }
@@ -186,7 +190,6 @@ class Game {
   async startGame () {
     this.started = true
     const products = await this.getRandomProducts(this.nbRounds)
-    console.log(this.getSettings())
     this.sendAll('GameStart', { settings: this.getSettings(), players: this.getPlayers() })
     const roundClock = new Clock(this.players, this.roundDuration)
     for (let round = 1; round <= this.nbRounds; round++) {
@@ -195,6 +198,8 @@ class Game {
       await pause()
     }
     this.sendAll('GameEnd')
+    this.players = []
+    this.started = false
   }
 
   async startRound (object, clock) {
@@ -213,17 +218,17 @@ class Game {
   generateScoreBoard () {
     const scoreBoard = []
     for (const player of this.players) {
-      scoreBoard.push({ name: globalinfo[2][player.socket.handshake.query.sessionId], score: player.score })
+      scoreBoard.push({ name: this.sessionHandler.getUsername(player.socket.handshake.query.sessionId), score: player.score })
     }
     scoreBoard.sort((a, b) => a.score - b.score).reverse()
     return scoreBoard
   }
 
-  whiteListAnswers (answers) {
+  whiteListAnswers (answers, context) {
     const whiteList = []
     for (const ans of answers) {
       whiteList.push({
-        name: globalinfo[2][ans.player.socket.handshake.query.sessionId],
+        name: context.sessionHandler.getUsername(ans.player.socket.handshake.query.sessionId),
         answer: ans.mess
       })
     }
@@ -240,7 +245,7 @@ class Game {
     }
     const scoreboard = {}
     scoreboard.newScore = this.generateScoreBoard()
-    scoreboard.lastAnswers = this.whiteListAnswers(answers)
+    scoreboard.lastAnswers = this.whiteListAnswers(answers, this)
     scoreboard.price = price
     console.log(scoreboard)
     this.sendAll('score', scoreboard)
