@@ -1,4 +1,4 @@
-const io = require('socket.io-client')
+import io from 'socket.io-client'
 
 // initial state
 const state = {
@@ -30,11 +30,7 @@ const mutations = {
     state.username = username
 
     // Connect socket
-    gameSocket = io({
-      query: {
-        sessionId: sessionId
-      }
-    })
+    gameSocket = io('https://vincentroche-nodeproject-9.glitch.me', { query: { sessionId: sessionId } })
   },
   logout (state) {
     state.sessionId = null
