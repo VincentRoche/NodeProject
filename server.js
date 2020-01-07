@@ -18,7 +18,10 @@ const { GamesHandler } = require('./game.js')
 const game = new GamesHandler(server)
 
 app.use(morgan('tiny'))
-app.use(cors())
+app.use(cors({
+  credentials: true,
+  origin: 'https://vincentroche-nodeproject-9.glitch.me' // si votre port est différent, changez cette valeur !
+}))
 
 const path = require('path')
 app.use(express.static(path.join(__dirname, 'dist/')))
