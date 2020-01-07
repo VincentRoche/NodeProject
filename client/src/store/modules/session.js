@@ -30,7 +30,7 @@ const mutations = {
     state.username = username
 
     // Connect socket
-    const socketAddress = 'http://localhost:8080'
+    const socketAddress = 'https://vincentroche-nodeproject-9.glitch.me:8080'
     gameSocket = io(socketAddress, { query: { sessionId: sessionId } })
   },
   logout (state) {
