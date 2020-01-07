@@ -19,9 +19,11 @@ const game = new GamesHandler(server)
 
 app.use(morgan('tiny'))
 app.use(cors())
-app.use(bodyParser.json())
 
 const path = require('path')
+app.use(express.static(path.join(__dirname, 'dist/')))
+
+app.use(bodyParser.json())
 
 // Connection to the database
 mongoose.connect(globalInfo[0], { useNewUrlParser: true, useUnifiedTopology: true })
