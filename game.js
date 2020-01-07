@@ -191,6 +191,7 @@ class Game {
   async startGame () {
     this.started = true
     const products = await this.getRandomProducts(this.nbRounds)
+    console.log(this.getSettings())
     this.sendAll('GameStart', { settings: this.getSettings(), players: this.getPlayers() })
     const roundClock = new Clock(this.players, this.roundDuration)
     for (let round = 1; round <= this.nbRounds; round++) {
@@ -205,7 +206,7 @@ class Game {
     const readyPlayers = []
     const answerPromises = []
     for (const player of this.players) {
-      player.socket.emit('RoundStart', { name: object.name, image: object.image })
+      player.socket.emit('RoundStart', { name: object.name, image: object.image, round: object.round })
       readyPlayers.push(this.readySignal(player))
       answerPromises.push(this.answerSignal(player))
     }
