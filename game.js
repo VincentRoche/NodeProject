@@ -53,7 +53,7 @@ class GamesHandler {
     const games = this.pendingGames
     const self = this
     this.io.on('connection', function (socket) {
-      console.log(`Socket connected with session ${this.handshake.query.sessionId}`)
+      console.log(`Socket connected with session ${socket.handshake.query.sessionId}`)
       socket.use(packetChecking)
       socket.on('joinGame', function (message) {
         const game = games[message.gameNumber]
