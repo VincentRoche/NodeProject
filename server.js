@@ -13,15 +13,28 @@ const Product = models[0]
 const User = models[1]
 
 // Chargement de socket.io
-const server = require('http').createServer(app)
+var server = require('http').createServer(app)
+var io = require('socket.io')(server)
+var port = process.env.PORT || 3000
+
+server.listen(port, function () {
+  console.log('Server listening at port %d', port)
+})
+
 const { GamesHandler } = require('./game.js')
-const game = new GamesHandler(server)
+
+const game = new GamesHandler(io)
 
 app.use(morgan('tiny'))
-app.use(cors())
-app.use(bodyParser.json())
+app.use(cors({
+  credentials: true,
+  origin: 'http://localhost:8080'
+}))
 
 const path = require('path')
+app.use(express.static(path.join(__dirname, 'dist/')))
+
+app.use(bodyParser.json())
 
 // Connection to the database
 mongoose.connect(globalInfo[0], { useNewUrlParser: true, useUnifiedTopology: true })
@@ -117,11 +130,6 @@ app.get('/', (req, res) => {
   res.json({
     message: 'Behold The MEVN Stack!'
   })
-})
-
-const port = process.env.PORT || 4000
-app.listen(port, () => {
-  console.log(`listening on ${port}`)
 })
 
 app.use(express.static('public'))

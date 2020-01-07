@@ -24,7 +24,7 @@ function getFileName (name) {
   const types = ['.jpg', '.png', '.jpeg', '.bmp']
   for (const type of types) {
     if (fs.existsSync('public/productPictures/' + name + type)) {
-      return 'http://localhost:4000/productPictures/' + name + type
+      return 'https://vincentroche-nodeproject-9.glitch.me/productPictures/' + name + type
     }
   }
   return -1
@@ -37,16 +37,10 @@ function pause () {
 }
 
 class GamesHandler {
-  constructor (server) {
+  constructor (io) {
     /** @member {Array<Game>} */
     this.pendingGames = {}
-    this.io = require('socket.io')(server, {
-      pingInterval: 2000,
-      pingTimeout: 4000
-    })
-    // this.socketsListener = io.listen(server)
-    server.listen(8080)
-    console.log('Socket listening on port 8080')
+    this.io = io
     this.addEvents()
   }
 
@@ -59,6 +53,7 @@ class GamesHandler {
     const games = this.pendingGames
     const self = this
     this.io.on('connection', function (socket) {
+      console.log(`Socket connected with session ${socket.handshake.query.sessionId}`)
       socket.use(packetChecking)
       socket.on('joinGame', function (message) {
         const game = games[message.gameNumber]

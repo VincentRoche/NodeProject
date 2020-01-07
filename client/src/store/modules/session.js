@@ -1,4 +1,4 @@
-const io = require('socket.io-client')
+import io from 'socket.io-client'
 
 // initial state
 const state = {
@@ -30,8 +30,7 @@ const mutations = {
     state.username = username
 
     // Connect socket
-    const socketAddress = 'http://localhost:8080'
-    gameSocket = io(socketAddress, { query: { sessionId: sessionId } })
+    gameSocket = io({ query: { sessionId: sessionId } })
   },
   logout (state) {
     state.sessionId = null
