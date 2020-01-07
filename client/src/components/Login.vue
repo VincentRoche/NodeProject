@@ -77,7 +77,7 @@ export default {
         if (this.$refs.form.validate()) {
             this.loading = true
             
-            const result = await this.axios.post('/log', {
+            const result = await this.axios.post(process.env.NODE_ENV === 'development' ? 'http://localhost:3000/log' : '/log', {
                 username: this.username,
                 password: this.password
             })

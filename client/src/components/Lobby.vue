@@ -63,7 +63,7 @@
             <v-slider
               v-model="rounds"
               class="pt-5"
-              max="50"
+              max="20"
               min="1"
               hide-details
               label="Rounds"

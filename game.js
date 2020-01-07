@@ -24,7 +24,7 @@ function getFileName (name) {
   const types = ['.jpg', '.png', '.jpeg', '.bmp']
   for (const type of types) {
     if (fs.existsSync('public/productPictures/' + name + type)) {
-      return 'https://vincentroche-nodeproject-9.glitch.me/productPictures/' + name + type
+      return (process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : 'https://vincentroche-nodeproject-9.glitch.me/') + 'productPictures/' + name + type
     }
   }
   return -1

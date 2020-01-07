@@ -30,7 +30,7 @@ const mutations = {
     state.username = username
 
     // Connect socket
-    gameSocket = io({ query: { sessionId: sessionId } })
+    gameSocket = io(process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '', { query: { sessionId: sessionId } })
   },
   logout (state) {
     state.sessionId = null
