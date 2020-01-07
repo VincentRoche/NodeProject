@@ -43,29 +43,27 @@
 
                   <!-- Price estimation form -->
                   <p class="caption mb-1">Your price estimation:</p>
-                  <v-form @submit="sendPrice">
-                    <v-text-field
-                      v-model="estimatedPrice"
-                      label="Estimated price"
-                      solo
-                      required
-                      autofocus
-                      type="number"
-                      hide-details
-                      prefix="€"
-                      :disabled="answered"
-                    >
-                    </v-text-field>
-                    <v-btn 
-                      color="primary"
-                      block
-                      @click="sendPrice"
-                      :disabled="answered"
-                      class="mt-2"
-                    >
-                      Send
-                    </v-btn>
-                  </v-form>
+                  <v-text-field
+                    v-model="estimatedPrice"
+                    label="Estimated price"
+                    solo
+                    required
+                    autofocus
+                    type="number"
+                    hide-details
+                    prefix="€"
+                    :disabled="answered"
+                  >
+                  </v-text-field>
+                  <v-btn 
+                    color="primary"
+                    block
+                    @click="sendPrice"
+                    :disabled="answered"
+                    class="mt-2"
+                  >
+                    Send
+                  </v-btn>
 
                   <!-- Item picture -->
                   <v-img
