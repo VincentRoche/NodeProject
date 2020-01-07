@@ -77,7 +77,7 @@ export default {
         if (this.$refs.form.validate()) {
             this.loading = true
             
-            const result = await this.axios.post('http://localhost:4000/log', {
+            const result = await this.axios.post('/log', {
                 username: this.username,
                 password: this.password
             })

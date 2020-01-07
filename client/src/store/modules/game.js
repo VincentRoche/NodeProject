@@ -2,7 +2,8 @@
 const state = {
   gameNumber: 0,
   rounds: 0,
-  roundDuration: 0
+  roundDuration: 0,
+  players: []
 }
 
 // getters
@@ -20,10 +21,14 @@ const mutations = {
     state.rounds = rounds
     state.roundDuration = roundDuration
   },
+  setPlayers (state, { players }) {
+    state.players = players
+  },
   reset (state) {
     state.gameNumber = 0
     state.rounds = 0
     state.roundDuration = 0
+    state.players = 0
   }
 }
 

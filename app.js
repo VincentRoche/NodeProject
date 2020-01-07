@@ -21,6 +21,8 @@ app.use(morgan('tiny'))
 app.use(cors())
 app.use(bodyParser.json())
 
+const path = require('path')
+
 // Connection to the database
 mongoose.connect(globalInfo[0], { useNewUrlParser: true, useUnifiedTopology: true })
 
@@ -121,7 +123,5 @@ const port = process.env.PORT || 4000
 app.listen(port, () => {
   console.log(`listening on ${port}`)
 })
-
-
 
 app.use(express.static('public'))

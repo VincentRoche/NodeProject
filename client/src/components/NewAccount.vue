@@ -105,7 +105,7 @@ export default {
                 // En sachant qu'à chaque fois je te renvoie un tableau de string
                 // parce que tu peux avoir plusieurs erreurs en même temps
                 // donc si tu veux tu peux faire une sorte de 'liste' à afficher à côté
-                const result = await this.axios.post('http://localhost:4000/acc', {
+                const result = await this.axios.post('/acc', {
                     username: this.username,
                     password: this.password
                 })
