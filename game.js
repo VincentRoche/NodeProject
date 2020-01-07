@@ -41,6 +41,7 @@ class GamesHandler {
     /** @member {Array<Game>} */
     this.pendingGames = {}
     this.io = io
+    this.addEvents()
   }
 
   /**
