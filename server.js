@@ -13,14 +13,22 @@ const Product = models[0]
 const User = models[1]
 
 // Chargement de socket.io
-const server = require('http').createServer(app)
+var server = require('http').createServer(app)
+var io = require('socket.io')(server)
+var port = process.env.PORT || 3000
+
+server.listen(port, function () {
+  console.log('Server listening at port %d', port)
+})
+
 const { GamesHandler } = require('./game.js')
-const game = new GamesHandler(server)
+
+const game = new GamesHandler(io)
 
 app.use(morgan('tiny'))
 app.use(cors({
   credentials: true,
-  origin: 'https://vincentroche-nodeproject-9.glitch.me' // si votre port est différent, changez cette valeur !
+  origin: 'http://localhost:8080'
 }))
 
 const path = require('path')
@@ -122,11 +130,6 @@ app.get('/', (req, res) => {
   res.json({
     message: 'Behold The MEVN Stack!'
   })
-})
-
-const port = process.env.PORT || 4000
-app.listen(port, () => {
-  console.log(`listening on ${port}`)
 })
 
 app.use(express.static('public'))
