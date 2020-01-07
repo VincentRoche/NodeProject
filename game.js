@@ -2,6 +2,8 @@ const models = require('./mongoosestructures.js')
 // const mongoose = require('mongoose')
 const globalinfo = require('./globalinfo.js')
 const Product = models[0]
+const fs = require('fs')
+
 // mongoose.connect(globalInfo[0], { useNewUrlParser: true, useUnifiedTopology: true })
 
 function packetChecking (packet, next) {
@@ -16,6 +18,22 @@ function packetChecking (packet, next) {
     }
   }
   next()
+}
+
+function getFileName (name) {
+  const types = ['.jpg', '.png', '.jpeg', '.bmp']
+  for (const type of types) {
+    if (fs.existsSync('public/productPictures/' + name + type)) {
+      return 'http://localhost:4000/productPictures/' + name + type
+    }
+  }
+  return -1
+}
+
+function pause () {
+  return new Promise(resolve => {
+    setTimeout(resolve, 5000)
+  })
 }
 
 class GamesHandler {
@@ -170,15 +188,17 @@ class Game {
     return randomProducts
   }
 
-  startGame () {
+  async startGame () {
     this.started = true
-    // get nbRounds Objects
+    const products = await this.getRandomProducts(this.nbRounds)
+    console.log(this.getSettings())
     this.sendAll('GameStart', { settings: this.getSettings(), players: this.getPlayers() })
+    const roundClock = new Clock(this.players, this.roundDuration)
     for (let round = 1; round <= this.nbRounds; round++) {
-      this.startRound({ round: round, name: 'patate', image: 'patate.jpg' })
+      const currProd = products[round - 1]
+      await this.startRound({ round: round, name: currProd.name, image: getFileName(currProd._id), price: currProd.price }, roundClock)
+      await pause()
     }
-    const clock = new Clock(this.players, this.roundDuration)
-    this.startRound({ name: 'patate', image: 'https://upload.wikimedia.org/wikipedia/commons/a/a3/234_Solanum_tuberosum_L.jpg', price: 100 }, clock)
     this.sendAll('GameEnd')
   }
 
@@ -186,7 +206,7 @@ class Game {
     const readyPlayers = []
     const answerPromises = []
     for (const player of this.players) {
-      player.socket.emit('RoundStart', { name: object.name, image: object.image })
+      player.socket.emit('RoundStart', { name: object.name, image: object.image, round: object.round })
       readyPlayers.push(this.readySignal(player))
       answerPromises.push(this.answerSignal(player))
     }
@@ -218,7 +238,7 @@ class Game {
   score (answers, price) {
     let score = answers.length
     for (const answer of answers) {
-      if (answer.mess >= 0) {
+      if (answer.mess > 0) {
         answer.player.score += score
         score--
       }
@@ -317,6 +337,7 @@ class Clock {
     for (const player of self.playerSet) {
       player.socket.emit('clock', self.actualValue)
     }
+    console.log(self.actualValue)
     if (self.actualValue === 0) {
       self.stop()
     }

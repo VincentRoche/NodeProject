@@ -124,15 +124,4 @@ app.listen(port, () => {
   console.log(`listening on ${port}`)
 })
 
-/*
-function getFileName (name) {
-  const types = ['.jpg', '.png', '.jpeg', '.bmp']
-  for (type of types) {
-    if (fs.existsSync('./productPictures/' + name + type)) {
-      return name + type
-    }
-  }
-  return -1
-}
-*/
-app.use(express.static(path.join(__dirname, '/client')))
+app.use(express.static('public'))

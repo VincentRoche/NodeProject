@@ -140,8 +140,7 @@ export default {
     })
     this.socket.on('GameStart', (message) => {
       // Save game settings
-      this.$store.commit('game/setGameNumber', { gameNumber: message.gameNumber })
-      this.$store.commit('game/setGameSettings', { rounds: message.rounds, roundDuration: message.roundDuration })
+      this.$store.commit('game/setGameSettings', { rounds: message.settings.rounds, roundDuration: message.settings.roundDuration })
       // Save players
       this.$store.commit('game/setPlayers', { players: message.players })
       // Start game

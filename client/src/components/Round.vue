@@ -208,7 +208,7 @@ export default {
     // Socket listeners
     this.socket = this.$store.getters['session/gameSocket']
     this.socket.on('RoundStart', (message) => {
-      this.newItem(message.name, message.image)
+      this.newItem(message.name, message.image, message.round)
     })
     this.socket.on('score', (message) => {
       this.players = message.newScore
@@ -216,9 +216,12 @@ export default {
     })
     this.socket.on('clock', (message) => {
       this.time = message
+      if(message === 0 && !this.answered) {
+        this.socket.emit('answer', 0)
+      }
     })
     this.socket.on('GameEnd', () => {
-      //this.showFinalResults = true
+      this.showFinalResults = true
     })
 
     // Fill player list
