@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import io from 'socket.io-client'
 
 // initial state
@@ -26,13 +27,16 @@ const actions = {}
 // mutations
 const mutations = {
   login (state, { sessionId, username }) {
+    console.log(`Vuex session login: ${sessionId}, ${username}`)
     state.sessionId = sessionId
     state.username = username
 
     // Connect socket
     gameSocket = io(process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '', { query: { sessionId: sessionId } })
+    console.log(`Vuex session gameSocket: ${gameSocket}`)
   },
   logout (state) {
+    console.log(`Vuex session logout`)
     state.sessionId = null
     state.username = null
     gameSocket = null

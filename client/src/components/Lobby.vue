@@ -114,6 +114,7 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 export default {
   data: () => ({
     socket: null,
@@ -128,6 +129,7 @@ export default {
   async created () {
     // Leave if not logged in
     if (!this.$store.getters['session/isLoggedIn']) {
+      console.log(`Lobby: not logged in`)
       this.$router.push('/')
       return
     }
@@ -137,8 +139,10 @@ export default {
     this.socket.on('players', (message) => {
       // Update player list
       this.players = message.map((p) => { return { name: p } })
+      console.log(`Player list updated`)
     })
     this.socket.on('GameStart', (message) => {
+      console.log(`GameStart`)
       // Save game settings
       this.$store.commit('game/setGameSettings', { rounds: message.settings.rounds, roundDuration: message.settings.roundDuration })
       // Save players
@@ -151,27 +155,34 @@ export default {
     if (this.$route.params.gameNumber === 'new') {
       // Create a new game and make this user admin
       this.socket.emit('hostGame')
+      console.log(`hostGame`)
       this.socket.on('gameNumber', (message) => {
         if (message.gameNumber) {
           this.gameNumber = message.gameNumber
           this.isGameAdmin = true
+          console.log(`gameNumber: ${this.gameNumber}`)
         } else {
           //  voir ce qu'on fait si ça marche pas
+          console.log(`Getting game number failed`)
         }
       })
     } else {
       this.gameNumber = this.$route.params.gameNumber
       
       this.socket.emit('joinGame', { name: this.$store.state.session.username, gameNumber: this.gameNumber })
+      console.log(`joinGame: ${this.gameNumber}`)
 
       this.socket.on('errorGameFull', () => {
         this.$router.push('/?error=errorGameFull')
+        console.log(`errorGameFull`)
       })
       this.socket.on('errorNotExist', () => {
         this.$router.push('/?error=errorNotExist')
+        console.log(`errorNotExist`)
       })
       this.socket.on('errorAlreadyStarted', () => {
         this.$router.push('/?error=errorAlreadyStarted')
+        console.log(`errorAlreadyStarted`)
       })
 
       // Update displayed game settings when then host edits them
@@ -179,17 +190,15 @@ export default {
         this.maxPlayers = settings.maxPlayers ? settings.maxPlayers : this.maxPlayers
         this.rounds = settings.rounds ? settings.rounds : this.rounds
         this.roundDuration = settings.roundDuration ? settings.roundDuration : this.roundDuration
+        console.log(`settingsUpdated`)
       })
     }
-
-    // Join the game
-    
-    
   },
   async destroyed () {
-    if (this.$route.path !== '/round') {
+    if (this.$route.path !== '/round' && this.socket) {
       // Leave the game
       this.socket.emit('leaveGame')
+      console.log(`leaveGame (Lobby destroyed)`)
     }
   },
   watch: {
@@ -210,6 +219,7 @@ export default {
     startGame () {
       this.gameStarting = true
       this.socket.emit('GameStart')
+      console.log(`GameStart`)
     },
     /**
      * Sends the new game settings to the server
@@ -225,6 +235,7 @@ export default {
           settings.roundDuration = this.roundDuration
         }
         this.socket.emit('settingsUpdate', settings)
+        console.log(`settingsUpdate`)
       }
     }
   }
