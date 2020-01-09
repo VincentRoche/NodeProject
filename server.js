@@ -73,7 +73,7 @@ app.post('/log', (req, res) => {
   }).catch(err => res.send(returnUserValidationErrors(err))) // Else, we send errors
 })
 
-app.post('/logout', (req, res) =>{
+app.post('/logout', (req, res) => {
   sessions.destroySession(escape(req.body.sessionId))
   res.send('logged out')
 })
@@ -129,3 +129,8 @@ app.get('/', (req, res) => {
 })
 
 app.use(express.static('public'))
+
+// Log promise errors
+process.on('unhandledRejection', (reason, p) => {
+  console.error('Unhandled Rejection at: Promise', p, '\nReason:', reason, '\n', reason.stack)
+})
