@@ -57,8 +57,9 @@ class GamesHandler {
       console.log(`Socket connected with session ${socket.handshake.query.sessionId}`)
       socket.use(packetChecking)
       socket.on('joinGame', function (message) {
-        const game = games[message.gameNumber]
         const playerName = self.sessionHandler.getUsername(this.handshake.query.sessionId)
+        console.log(`${playerName} wants to join game ${message.gameNumber}`)
+        const game = games[message.gameNumber]
         if (game && !game.started) {
           if (!games[message.gameNumber].addPlayer(new Player(socket, playerName))) {
             this.emit('errorGameFull')
@@ -83,6 +84,10 @@ class GamesHandler {
         games[newGame].addPlayer(new Player(socket, self.sessionHandler.getUsername(this.handshake.query.sessionId)))
         this.emit('gameNumber', { gameNumber: newGame })
         this.emit('players', games[newGame].getPlayers())
+      })
+      // Logout if the socket disconnects
+      socket.on('disconnect', function () {
+        self.sessionHandler.destroySession(this.handshake.query.sessionId)
       })
     })
   }
