@@ -23,7 +23,7 @@ function getFileName (name) {
   const types = ['.jpg', '.png', '.jpeg', '.bmp']
   for (const type of types) {
     if (fs.existsSync('public/productPictures/' + name + type)) {
-      return (process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : 'https://vincentroche-nodeproject-9.glitch.me/') + 'productPictures/' + name + type
+      return 'productPictures/' + name + type
     }
   }
   return -1
@@ -40,7 +40,7 @@ class GamesHandler {
     /** @member {Array<Game>} */
     this.pendingGames = {}
     this.sessionHandler = sessionHandler
-    console.log("HANDLER", this.sessionHandler)
+    console.log('HANDLER', this.sessionHandler)
     this.io = io
     this.addEvents()
   }
@@ -58,25 +58,29 @@ class GamesHandler {
       socket.use(packetChecking)
       socket.on('joinGame', function (message) {
         const game = games[message.gameNumber]
+        const playerName = self.sessionHandler.getUsername(this.handshake.query.sessionId)
         if (game && !game.started) {
-          if (!games[message.gameNumber].addPlayer(new Player(socket))) {
+          if (!games[message.gameNumber].addPlayer(new Player(socket, playerName))) {
             this.emit('errorGameFull')
+            console.log(`errorGameFull for ${playerName}`)
           } else {
             this.emit('gameJoined')
             game.sendAll('players', game.getPlayers())
             this.emit('settingsUpdated', game.getSettings())
-            console.log('Player', self.sessionHandler.getUsername(this.handshake.query.sessionId), 'joined game n°', message.gameNumber)
+            console.log('Player', playerName, 'joined game n°', message.gameNumber)
           }
         } else if (!game) {
           this.emit('errorNotExist')
+          console.log(`errorNotExist for ${playerName}`)
         } else if (game.started) {
           this.emit('errorAlreadyStarted')
+          console.log(`errorAlreadyStarted for ${playerName}`)
         }
       })
       socket.on('hostGame', function () {
         const newGame = self.getHostNumber(socket, self)
         console.log('newgame', newGame)
-        games[newGame].addPlayer(new Player(socket))
+        games[newGame].addPlayer(new Player(socket, self.sessionHandler.getUsername(this.handshake.query.sessionId)))
         this.emit('gameNumber', { gameNumber: newGame })
         this.emit('players', games[newGame].getPlayers())
       })
@@ -157,12 +161,13 @@ class Game {
   getPlayers () {
     const toReturn = []
     for (const player of this.players) {
-      toReturn.push(this.sessionHandler.getUsername(player.socket.handshake.query.sessionId))
+      toReturn.push(player.name)
     }
     return toReturn
   }
 
   sendAll (messageType, messageContent = {}) {
+    console.log(`sendAll(${messageType}, ${JSON.stringify(messageContent)}) to ${this.players.length} players`)
     for (const player of this.players) {
       player.socket.emit(messageType, messageContent)
     }
@@ -203,22 +208,26 @@ class Game {
   }
 
   async startRound (object, clock) {
+    console.log(`startRound ${object.round}`)
     const readyPlayers = []
     const answerPromises = []
     for (const player of this.players) {
+      console.log(`RoundStart to ${player.name}`)
       player.socket.emit('RoundStart', { name: object.name, image: object.image, round: object.round })
       readyPlayers.push(this.readySignal(player))
       answerPromises.push(this.answerSignal(player))
     }
     clock.start()
+    console.log(`Waiting for ready signals...`)
     await Promise.all(readyPlayers)
+    console.log(`All ready.`)
     this.score(await this.compareAnswers(answerPromises, clock, object.price), object.price)
   }
 
   generateScoreBoard () {
     const scoreBoard = []
     for (const player of this.players) {
-      scoreBoard.push({ name: this.sessionHandler.getUsername(player.socket.handshake.query.sessionId), score: player.score })
+      scoreBoard.push({ name: player.name, score: player.score })
     }
     scoreBoard.sort((a, b) => a.score - b.score).reverse()
     return scoreBoard
@@ -280,9 +289,11 @@ class Game {
   answerSignal (player) {
     return new Promise((resolve, reject) => {
       player.socket.on('answer', function (message) {
+        console.log(`Player ${player.name} answered ${message}`)
         resolve({ mess: parseInt(message), player: player, timestamp: Date.now() })
       })
       player.socket.on('disconnect', (reason) => {
+        console.log(`Reject answerSignal for player ${player.name}`)
         reject(reason)
       })
     })
@@ -291,6 +302,7 @@ class Game {
   readySignal (player) {
     return new Promise((resolve, reject) => {
       player.socket.on('ready', function () {
+        console.log(`Player ${player.name} ready`)
         resolve('ready')
       })
       setTimeout(reject, 4000, { status: 'connection error', player: player })
@@ -302,9 +314,11 @@ class Player {
   /**
    * @param {Socket} socket
    */
-  constructor (socket) {
+  constructor (socket, name) {
     /** @member {Socket} */
     this.socket = socket
+    /** @member {String} */
+    this.name = name
     /** @member {Number} */
     this.score = 0
   }

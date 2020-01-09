@@ -66,6 +66,7 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 export default {
   data: () => ({
     gameNumber: '',
@@ -81,6 +82,7 @@ export default {
      * Attempt to join game with the given number
      */
     joinGame () {
+      console.log(`joinGame ${this.gameNumber}`)
       this.joinLoading = true
       this.$router.push(`/lobby/${this.gameNumber}`)
     }

@@ -176,6 +176,7 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 export default {
   data: () => ({
     socket: null,
@@ -202,6 +203,7 @@ export default {
   created () {
     // Leave if not logged in
     if (!this.$store.getters['session/isLoggedIn']) {
+      console.log(`Round: not logged in`)
       this.$router.push('/')
       return
     }
@@ -209,6 +211,7 @@ export default {
     // Socket listeners
     this.socket = this.$store.getters['session/gameSocket']
     this.socket.on('RoundStart', (message) => {
+      console.log(`Round ${message.round} start`)
       this.newItem(message.name, message.image, message.round)
     })
     this.socket.on('score', (message) => {
@@ -218,14 +221,18 @@ export default {
       for (const a of message.lastAnswers) {
         this.lastAnswers[a.name] = a.answer
       }
+      console.log(`Updated scores`)
     })
     this.socket.on('clock', (message) => {
       this.time = message
-      if(message === 0 && !this.answered) {
+      console.log(`Clock: ${this.time}`)
+      if (message === 0 && !this.answered) {
         this.socket.emit('answer', 0)
+        console.log(`Auto answer: 0`)
       }
     })
     this.socket.on('GameEnd', () => {
+      console.log(`GameEnd`)
       this.showFinalResults = true
     })
 
@@ -240,6 +247,7 @@ export default {
       if (this.estimatedPrice > 0) {
         this.answered = true
         this.socket.emit('answer', this.estimatedPrice)
+        console.log(`Send answer: ${this.estimatedPrice}`)
       }
     },
     /**
@@ -247,25 +255,27 @@ export default {
      */
     newItem (itemName, imageUrl, round) {
       this.itemName = itemName
-      this.imageUrl = imageUrl
+      this.imageUrl = (process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : 'https://vincentroche-nodeproject-9.glitch.me/') + imageUrl
       this.round = round
       this.estimatedPrice = ''
       this.answered = false
       this.answer = 0
       this.lastAnswers = []
       this.time = this.$store.state.game.roundDuration
+      console.log(`New item: ${this.itemName}`)
     },
     /**
      * Tell the server that the image has been displayed
      */
     ready () {
       this.socket.emit('ready')
+      console.log(`Ready`)
     },
     /**
      * Creates a new game with the same players.
      */
     newGame () {
-      this.$router.push(`/lobby/${0}`)
+      //this.$router.push(`/lobby/${0}`)
     },
     /**
      * Return to home page after the game has ended.
@@ -273,6 +283,7 @@ export default {
     quit () {
       this.$store.commit('game/resetGameNumber')
       this.$router.push('/')
+      console.log(`Round: quit`)
     }
   },
   computed: {
