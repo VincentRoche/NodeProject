@@ -27,7 +27,7 @@
         <v-col sm="6" md="4" lg="2">
           <p class="font-weight-medium">Join a game:</p>
           <v-alert type="error" v-if="$route.query.error">{{ errors[$route.query.error] }}</v-alert>
-          <v-form @submit="joinGame">
+          <!--<v-form @submit="joinGame">-->
             <v-text-field
               v-model="gameNumber"
               label="Game number"
@@ -48,7 +48,7 @@
                 </v-btn>
               </template>
             </v-text-field>
-          </v-form>
+          <!--</v-form>-->
         </v-col>
       </v-row>
       <v-row justify="center">

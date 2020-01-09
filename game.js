@@ -126,10 +126,12 @@ class Game {
     const self = this
     // impromptuous disconnection
     player.socket.on('disconnect', function () {
+      console.log(`Socket ${player.socket.handshake.query.sessionId} (${player.name}) disconnected`)
       self.removePlayer(player)
     })
     // wanted disconnection
     player.socket.on('leaveGame', function () {
+      console.log(`Player ${player.name} leaveGame`)
       self.removePlayer(player)
     })
     this.players.push(player)
@@ -138,7 +140,7 @@ class Game {
 
   removePlayer (player) {
     this.players = this.players.filter(e => e.socket.handshake.query.sessionId !== player.socket.handshake.query.sessionId)
-    const name = globalinfo[2][player.socket.handshake.query.sessionId]
+    const name = player.name
     player.socket.removeAllListeners().disconnect()
     console.log(`Player ${name} disconnected`)
   }

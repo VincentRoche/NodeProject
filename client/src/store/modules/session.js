@@ -34,6 +34,15 @@ const mutations = {
     // Connect socket
     gameSocket = io(process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '', { query: { sessionId: sessionId } })
     console.log(`Vuex session gameSocket: ${gameSocket}`)
+
+    // Logout on socket disconnect
+    gameSocket.on('disconnect', () => {
+      console.log('Socket disconnected')
+      state.sessionId = null
+      state.username = null
+      gameSocket = null
+      alert('You have been disconnected because of connection issues with the server.')
+    })
   },
   logout (state) {
     console.log(`Vuex session logout`)

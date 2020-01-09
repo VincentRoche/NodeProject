@@ -43,7 +43,7 @@
 
                   <!-- Price estimation form -->
                   <p class="caption mb-1">Your price estimation:</p>
-                  <v-form @submit="sendPrice">
+                  <!--<v-form @submit="sendPrice">-->
                     <v-text-field
                       v-model="estimatedPrice"
                       label="Estimated price"
@@ -65,7 +65,7 @@
                     >
                       Send
                     </v-btn>
-                  </v-form>
+                  <!--</v-form>-->
 
                   <!-- Item picture -->
                   <v-img
