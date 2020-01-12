@@ -3,6 +3,7 @@ const models = require('./mongoosestructures.js')
 const globalinfo = require('./globalinfo.js')
 const Product = models[0]
 const fs = require('fs')
+const allSettled = require('promise.allsettled')
 //  const { SessionHandler } = require('./session.js')
 
 function packetChecking (packet, next) {
@@ -230,7 +231,7 @@ class Game {
     }
     clock.start()
     console.log('Waiting for ready signals...')
-    const results = await Promise.allSettled(readyPlayers)
+    const results = await allSettled(readyPlayers)
     results.forEach((result) => {
       if (result.status === 'rejected') {
         this.removePlayer(result.player)
@@ -279,7 +280,7 @@ class Game {
 
   async compareAnswers (answerPromises, clock, price) {
     return new Promise(async (resolve, reject) => {
-      let results = await Promise.allSettled(answerPromises)
+      let results = await allSettled(answerPromises)
       results.forEach((res) => {
         console.log(res)
         if (res.status === 'rejected') {
