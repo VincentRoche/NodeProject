@@ -145,7 +145,7 @@ class Game {
   removePlayer (player) {
     this.players = this.players.filter(e => e.socket.handshake.query.sessionId !== player.socket.handshake.query.sessionId)
     const name = player.name
-    player.socket.removeAllListeners().disconnect()
+    // player.socket.removeAllListeners().disconnect()
     console.log(`Player ${name} removed from game`)
     if (this.players.length === 0) {
       this.started = false
