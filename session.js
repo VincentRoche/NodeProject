@@ -3,7 +3,6 @@ const sha256 = require('sha256')
 class SessionHandler {
   constructor () {
     this.sessions = Object()
-    console.log('ntm')
   }
 
   // To generate a session ID

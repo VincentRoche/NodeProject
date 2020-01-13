@@ -35,3 +35,5 @@ new Vue({
   axios,
   render: h => h(App)
 }).$mount('#app')
+
+document.title = 'Le Juste Prix'

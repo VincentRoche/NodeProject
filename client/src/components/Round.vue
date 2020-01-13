@@ -281,7 +281,7 @@ export default {
      * Return to home page after the game has ended.
      */
     quit () {
-      this.$store.commit('game/resetGameNumber')
+      this.$store.commit('game/reset')
       this.$router.push('/')
       console.log(`Round: quit`)
     }

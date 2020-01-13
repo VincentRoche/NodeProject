@@ -3,6 +3,7 @@ const models = require('./mongoosestructures.js')
 const globalinfo = require('./globalinfo.js')
 const Product = models[0]
 const fs = require('fs')
+const allSettled = require('promise.allsettled')
 //  const { SessionHandler } = require('./session.js')
 
 function packetChecking (packet, next) {
@@ -57,8 +58,9 @@ class GamesHandler {
       console.log(`Socket connected with session ${socket.handshake.query.sessionId}`)
       socket.use(packetChecking)
       socket.on('joinGame', function (message) {
-        const game = games[message.gameNumber]
         const playerName = self.sessionHandler.getUsername(this.handshake.query.sessionId)
+        console.log(`${playerName} wants to join game ${message.gameNumber}`)
+        const game = games[message.gameNumber]
         if (game && !game.started) {
           if (!games[message.gameNumber].addPlayer(new Player(socket, playerName))) {
             this.emit('errorGameFull')
@@ -79,10 +81,13 @@ class GamesHandler {
       })
       socket.on('hostGame', function () {
         const newGame = self.getHostNumber(socket, self)
-        console.log('newgame', newGame)
         games[newGame].addPlayer(new Player(socket, self.sessionHandler.getUsername(this.handshake.query.sessionId)))
         this.emit('gameNumber', { gameNumber: newGame })
         this.emit('players', games[newGame].getPlayers())
+      })
+      // Logout if the socket disconnects
+      socket.on('disconnect', function () {
+        self.sessionHandler.destroySession(this.handshake.query.sessionId)
       })
     })
   }
@@ -108,7 +113,6 @@ class Game {
     this.started = false
     this.hostSocket = hostSocket
     this.sessionHandler = sessionHandler
-    console.log(sessionHandler)
     const self = this
     this.hostSocket.on('GameStart', function () {
       console.log('startGame')
@@ -141,8 +145,12 @@ class Game {
   removePlayer (player) {
     this.players = this.players.filter(e => e.socket.handshake.query.sessionId !== player.socket.handshake.query.sessionId)
     const name = player.name
-    player.socket.removeAllListeners().disconnect()
-    console.log(`Player ${name} disconnected`)
+    // player.socket.removeAllListeners().disconnect()
+    console.log(`Player ${name} removed from game`)
+    if (this.players.length === 0) {
+      this.started = false
+      console.log('Game stopped, no player left')
+    }
   }
 
   updateSettings (settings) {
@@ -199,10 +207,12 @@ class Game {
     const products = await this.getRandomProducts(this.nbRounds)
     this.sendAll('GameStart', { settings: this.getSettings(), players: this.getPlayers() })
     const roundClock = new Clock(this.players, this.roundDuration)
-    for (let round = 1; round <= this.nbRounds; round++) {
+    let round = 1
+    while (round <= this.nbRounds && this.started) {
       const currProd = products[round - 1]
       await this.startRound({ round: round, name: currProd.name, image: getFileName(currProd._id), price: currProd.price }, roundClock)
       await pause()
+      round++
     }
     this.sendAll('GameEnd')
     this.players = []
@@ -220,9 +230,14 @@ class Game {
       answerPromises.push(this.answerSignal(player))
     }
     clock.start()
-    console.log(`Waiting for ready signals...`)
-    await Promise.all(readyPlayers)
-    console.log(`All ready.`)
+    console.log('Waiting for ready signals...')
+    const results = await allSettled(readyPlayers)
+    results.forEach((result) => {
+      if (result.status === 'rejected') {
+        this.removePlayer(result.player)
+      }
+    })
+    console.log('All ready.')
     this.score(await this.compareAnswers(answerPromises, clock, object.price), object.price)
   }
 
@@ -239,8 +254,8 @@ class Game {
     const whiteList = []
     for (const ans of answers) {
       whiteList.push({
-        name: context.sessionHandler.getUsername(ans.player.socket.handshake.query.sessionId),
-        answer: ans.mess
+        name: context.sessionHandler.getUsername(ans.value.player.socket.handshake.query.sessionId),
+        answer: ans.value.mess
       })
     }
     return whiteList
@@ -248,9 +263,10 @@ class Game {
 
   score (answers, price) {
     let score = answers.length
+    console.log(answers)
     for (const answer of answers) {
-      if (answer.mess > 0) {
-        answer.player.score += score
+      if (answer !== undefined && answer.value.mess > 0) {
+        answer.value.player.score += score
         score--
       }
     }
@@ -264,16 +280,28 @@ class Game {
 
   async compareAnswers (answerPromises, clock, price) {
     return new Promise(async (resolve, reject) => {
-      let results = await Promise.all(answerPromises)
-      //  console.log('res', results)
-      clock.stop()
-      results = results.map(a => {
-        if (a.mess !== 0) {
-          a.diff = Math.abs(a.mess - price)
-        } else {
-          a.diff = -1
+      let results = await allSettled(answerPromises)
+      results.forEach((res) => {
+        console.log(res)
+        if (res.status === 'rejected') {
+          const index = results.indexOf(res)
+          console.log('index to remove', index)
+          if (index !== -1) {
+            results.splice(index, 1)
+          }
         }
-        return a
+      })
+      clock.stop()
+      console.log(results)
+      results = results.map(a => {
+        if (a.value) {
+          if (a.value.mess !== 0) {
+            a.diff = Math.abs(a.value.mess - price)
+          } else {
+            a.diff = -1
+          }
+          return a
+        }
       })
       results.sort((a, b) => {
         if (a.diff < b.diff) {
@@ -284,7 +312,7 @@ class Game {
           return a.timestamp - b.timestamp
         }
       })
-      resolve(results)
+      resolve(results.filter((el) => el !== undefined))
     })
   }
 
@@ -296,6 +324,7 @@ class Game {
       })
       player.socket.on('disconnect', (reason) => {
         console.log(`Reject answerSignal for player ${player.name}`)
+        // this.removePlayer(player)
         reject(reason)
       })
     })

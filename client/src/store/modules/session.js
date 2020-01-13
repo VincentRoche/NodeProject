@@ -41,7 +41,7 @@ const mutations = {
       state.sessionId = null
       state.username = null
       gameSocket = null
-      alert('You have been disconnected because of connection issues with the server.')
+      console.warn('You have been disconnected because of connection issues with the server.')
     })
   },
   logout (state) {
