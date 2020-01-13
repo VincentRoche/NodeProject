@@ -74,7 +74,6 @@
                     max-height="600"
                     class="mt-4"
                     v-if="imageUrl"
-                    v-on:load="ready"
                   >
                     <!-- Answer overlay -->
                     <v-overlay
@@ -213,6 +212,7 @@ export default {
     this.socket.on('RoundStart', (message) => {
       console.log(`Round ${message.round} start`)
       this.newItem(message.name, message.image, message.round)
+      this.ready()
     })
     this.socket.on('score', (message) => {
       this.players = message.newScore
@@ -234,6 +234,11 @@ export default {
     this.socket.on('GameEnd', () => {
       console.log(`GameEnd`)
       this.showFinalResults = true
+    })
+    this.socket.on('kick', () => {
+      console.warn(`Kicked from game.`)
+      this.$store.commit('session/logout')
+      this.$router.push('/')
     })
 
     // Fill player list
