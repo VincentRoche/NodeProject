@@ -236,8 +236,8 @@ class Game {
         if (result.reason.player) {
           this.removePlayer(result.reason.player)
           if (result.reason.player.socket) {
-            console.log(`Disconnecting player ${result.reason.player.name} because they were not ready on time.`)
-            // result.reason.player.socket.removeAllListeners().disconnect()
+            console.log(`Kicking player ${result.reason.player.name} because they were not ready on time.`)
+            result.reason.player.socket.emit('kick')
           }
         }
       }
