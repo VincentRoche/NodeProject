@@ -145,7 +145,6 @@ class Game {
   removePlayer (player) {
     this.players = this.players.filter(e => e.socket.handshake.query.sessionId !== player.socket.handshake.query.sessionId)
     const name = player.name
-    // player.socket.removeAllListeners().disconnect()
     console.log(`Player ${name} removed from game`)
     if (this.players.length === 0) {
       this.started = false
@@ -234,7 +233,13 @@ class Game {
     const results = await allSettled(readyPlayers)
     results.forEach((result) => {
       if (result.status === 'rejected') {
-        this.removePlayer(result.player)
+        if (result.reason.player) {
+          this.removePlayer(result.reason.player)
+          if (result.reason.player.socket) {
+            console.log(`Disconnecting player ${result.reason.player.name} because they were not ready on time.`)
+            // result.reason.player.socket.removeAllListeners().disconnect()
+          }
+        }
       }
     })
     console.log('All ready.')
