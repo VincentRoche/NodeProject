@@ -239,6 +239,13 @@ export default {
     // Fill player list
     this.players = this.$store.state.game.players.map(p => { return { name: p, score: 0 } })
   },
+  async destroyed () {
+    if (!this.showFinalResults && this.socket) {
+      // Leave the game
+      this.socket.emit('leaveGame')
+      console.log(`leaveGame (Round destroyed)`)
+    }
+  },
   methods: {
     /**
      * Send to the server the price guessed by the user.
