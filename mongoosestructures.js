@@ -22,16 +22,14 @@ const userSchema = new Schema({
   username: {
     type: String,
     required: ['Username must not be empty.'],
-    match: [/^[a-z0-9' ]+$/i, 'Invalid caracters detected in the username.'],
-    minlength: [3, 'Use 3 or more caracters for the username.'],
+    match: [/^[a-z0-9']+$/i, 'Invalid characters detected in the username.'],
+    minlength: [3, 'Use 3 or more characters for the username.'],
     maxlength: [20, 'The username is too long.']
   },
   password: {
     type: String,
     required: ['Password must not be empty.'],
-    match: [/^[a-z0-9_!]+$/i, 'Invalid caracters detected in the password.'],
-    minlength: [3, 'Use 3 or more caracters for the password.'],
-    maxlength: [20, 'The password is too long.']
+    minlength: [3, 'Use 3 or more characters for the password.']
   }
 })
 
